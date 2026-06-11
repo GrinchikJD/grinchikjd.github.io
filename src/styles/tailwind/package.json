@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production npx tailwindcss --postcss -i input.css -o ../styles.css --minify"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
