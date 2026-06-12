@@ -1,5 +1,7 @@
-const PWA_CACHE_NAME = 'jd-pwa-app-cache-v1';
-const PWA_urlsToCache = [
+const PWA_CACHE_VERSION = '1.0.2';
+const PWA_CACHE_PREFIX = 'jd-pwa-app-cache';
+const PWA_CACHE_NAME = `${PWA_CACHE_PREFIX}-${PWA_CACHE_VERSION}`;
+const PWA_URLS_TO_CACHE = [
     '/',
     '/favicon.ico',
     '/index.html',
@@ -9,18 +11,50 @@ const PWA_urlsToCache = [
     '/src/lib/alpine.js',
     '/app.js',
     '/src/components/other/FormSpree.js',
+    '/src/components/other/Button.js',
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(PWA_CACHE_NAME).then(cache => cache.addAll(PWA_urlsToCache))
+        caches.open(PWA_CACHE_NAME)
+            .then(cache => cache.addAll(PWA_URLS_TO_CACHE.map(url => new Request(url, { cache: 'reload' }))))
+            .then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys()
+            .then(cacheNames => Promise.all(
+                cacheNames
+                    .filter(cacheName => cacheName.startsWith(PWA_CACHE_PREFIX) && cacheName !== PWA_CACHE_NAME)
+                    .map(cacheName => caches.delete(cacheName))
+            ))
+            .then(() => self.clients.claim())
     );
 });
 
 self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') {
+        return;
+    }
+
+    const requestUrl = new URL(event.request.url);
+
+    if (requestUrl.origin !== self.location.origin) {
+        return;
+    }
+
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => caches.open(PWA_CACHE_NAME).then(cache => cache.match('/index.html')))
+        );
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request).then(response => {
+        caches.open(PWA_CACHE_NAME).then(cache => cache.match(event.request).then(response => {
             return response || fetch(event.request);
-        })
+        }))
     );
 });
