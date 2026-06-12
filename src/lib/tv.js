@@ -118,7 +118,7 @@ var $tv = (function() {
 
         handleScriptFetch: async function(el, idx) {
             if (this.fetchedTags.includes(el.define)) return;
-            this.fetchedTags.push(el.define)
+            this.fetchedTags.push(el.define);
 
             let newScript = document.createElement('script');
         
