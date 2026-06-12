@@ -1,5 +1,7 @@
+@import "./theme/fonts.css";
+@import "./theme/page.css";
+@import "./theme/tv-anti-layout-shift.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import "./../theme/fonts.css";

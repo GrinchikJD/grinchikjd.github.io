@@ -1,0 +1,4 @@
+/** Styles for reducing layout shift of dynamic components */
+tv-email {
+    @apply min-h-[115px];
+}
