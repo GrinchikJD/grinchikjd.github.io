@@ -1,4 +1,4 @@
-const PWA_CACHE_VERSION = '1.0.2';
+const PWA_CACHE_VERSION = '1.0.1';
 const PWA_CACHE_PREFIX = 'jd-pwa-app-cache';
 const PWA_CACHE_NAME = `${PWA_CACHE_PREFIX}-${PWA_CACHE_VERSION}`;
 const PWA_URLS_TO_CACHE = [
@@ -47,7 +47,18 @@ self.addEventListener('fetch', event => {
 
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => caches.open(PWA_CACHE_NAME).then(cache => cache.match('/index.html')))
+            fetch(event.request).then(response => {
+                if (response.ok) {
+                    const responseClone = response.clone();
+                    caches.open(PWA_CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+                }
+
+                return response;
+            }).catch(() => caches.open(PWA_CACHE_NAME).then(cache => (
+                cache.match(event.request)
+                    .then(response => response || cache.match(requestUrl.pathname))
+                    .then(response => response || cache.match('/index.html'))
+            )))
         );
         return;
     }

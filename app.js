@@ -8,6 +8,7 @@ $tv.import({ define: 'tv-button', file: '/src/components/other/Button'});
 
 
 // Service Worker for PWA cache
+/* TODO: Add service worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
@@ -15,3 +16,4 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('⚠️ Service Worker: Something was going wrong...', err));
     });
 }
+*/
