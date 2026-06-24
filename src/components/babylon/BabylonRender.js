@@ -3,8 +3,19 @@ class BabylonRender extends TvAlpineHTMLElement {
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
     TV_HTML = /*html*/`
-        <canvas id="mainCanvas" style="outline:none;"></canvas>
-        <button @click="applySkin()">Apply skin</button>
+        <!--
+        <img src="/src/3d/smartphone/preview.png" width="300" height="300" 
+            title="Smartphone preview"
+            x-show="!isAllScriptsFetched"
+        />
+        -->
+        <div class="flex gap-8 items-center">
+            <canvas id="main-canvas" style="outline:none;"></canvas>
+            <canvas id="fetch-image" style="position: fixed; width: 0; height:0;"></canvas>
+        </div>
+        <button @click="applySkin()">Apply</button>
+        <input id="load-image" type="file" />
+        
     `
 
     initBabylonRenderComponent() {
@@ -19,12 +30,15 @@ class BabylonRender extends TvAlpineHTMLElement {
                 'src/lib/babylon_import.js'
             ],
             isAllScriptsFetched: false,
+            imageInput: null,
+            imageInputCanvas: null,
 
             init() {
-                this.canvas = this.$el.querySelector("#mainCanvas");
+                this.canvas = this.$el.querySelector("#main-canvas");
                 this.canvas.width = 300;
                 this.canvas.height = 300;
                 this.fetchScripts(this.startRender.bind(this));
+                this.handleImageInput();
             },
 
             fetchScripts(callback) {
@@ -114,6 +128,52 @@ class BabylonRender extends TvAlpineHTMLElement {
                         mesh.material.albedoTexture = newTexture;
                     } else if (mesh.material instanceof BABYLON.StandardMaterial) {
                         mesh.material.diffuseTexture = newTexture;
+                    }
+                });
+            },
+
+            handleImageInput() {
+                this.imageInput = this.$el.querySelector("#load-image");
+                this.imageInputCanvas = this.$el.querySelector("#fetch-image"); 
+                this.imageInputCanvas.width = 512;
+                this.imageInputCanvas.height = 512;
+                this.imageInput.addEventListener('change', this.loadInputImage.bind(this));
+            },
+
+            loadInputImage(e) {
+                const file = e.target.files[e.target.files.length - 1];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    const ctx = this.imageInputCanvas.getContext("2d");
+                    const img = new Image();
+                    img.onload = () => {
+                        ctx.clearRect(0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
+                        ctx.drawImage(img, 0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
+                        this.handleInputImageTexture();
+                    };
+                    img.src = base64;
+                };
+                reader.readAsDataURL(file);
+            },
+            
+            handleInputImageTexture() {
+                if (!this.mainMaterialLink || !this.meshes.length) return;
+                
+                const dataURL = this.imageInputCanvas.toDataURL('image/png');
+                const textureId = "extCanvasTex_" + Date.now();
+                const tex = BABYLON.Texture.CreateFromBase64String(dataURL, textureId, this.scene, true, false);
+                this.meshes.forEach((mesh, idx) => {
+                    if (idx !== 0) return;
+                    const mat = mesh.material;
+                    if (mat && mat.getClassName && mat.getClassName() === "PBRMetallicRoughnessMaterial") {
+                        mat.baseTexture = tex;
+                    } else if (mat instanceof BABYLON.PBRMaterial) {
+                        mat.albedoTexture = tex;
+                    } else if (mat instanceof BABYLON.StandardMaterial) {
+                        mat.diffuseTexture = tex;
                     }
                 });
             }
