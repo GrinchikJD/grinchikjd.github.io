@@ -11,11 +11,17 @@ class BabylonRender extends TvAlpineHTMLElement {
         -->
         <div class="flex gap-8 items-center">
             <canvas id="main-canvas" style="outline:none;"></canvas>
-            <canvas id="fetch-image" style="position: fixed; width: 0; height:0;"></canvas>
+            <canvas id="fetch-image" class="border-2 border-gray-600"
+                style="width: 141px; height: 300px; border-radius: 10px; background-color:#000;"></canvas>
         </div>
         <button @click="applySkin()">Apply</button>
         <input id="load-image" type="file" />
-        
+        <div class="flex flex-col items-center">
+            <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" />
+            <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" />
+            <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
+            <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
+        </div>
     `
 
     initBabylonRenderComponent() {
@@ -23,6 +29,7 @@ class BabylonRender extends TvAlpineHTMLElement {
             canvas: null,
             engine: null,
             scene: null,
+            camera: null,
             mainMaterialLink: null,
             meshes: [],
             libs: [
@@ -30,8 +37,16 @@ class BabylonRender extends TvAlpineHTMLElement {
                 'src/lib/babylon_import.js'
             ],
             isAllScriptsFetched: false,
+            imageAttachment: null,
             imageInput: null,
             imageInputCanvas: null,
+            catchedTexture: null,
+            catchedTextureX: 0,
+            catchedTextureY: 0,
+            catchedTextureScale: 100,
+            catchedTextureRotate: 0,
+            applyingDebounceMs: 1000,
+            applyingTimeout: null,
 
             init() {
                 this.canvas = this.$el.querySelector("#main-canvas");
@@ -39,6 +54,10 @@ class BabylonRender extends TvAlpineHTMLElement {
                 this.canvas.height = 300;
                 this.fetchScripts(this.startRender.bind(this));
                 this.handleImageInput();
+                this.$watch('catchedTextureX', this.handleImageInputImagePosition.bind(this));
+                this.$watch('catchedTextureY', this.handleImageInputImagePosition.bind(this));
+                this.$watch('catchedTextureScale', this.handleImageInputImagePosition.bind(this));
+                this.$watch('catchedTextureRotate', this.handleImageInputImagePosition.bind(this));
             },
 
             fetchScripts(callback) {
@@ -83,6 +102,7 @@ class BabylonRender extends TvAlpineHTMLElement {
                 const camera = new BABYLON.ArcRotateCamera(
                     "camera", -Math.PI / 5, Math.PI / 2.5, 5, new BABYLON.Vector3(0, 0, 0), scene
                 );
+                this.camera = camera;
                 camera.attachControl(this.canvas, true);
                 camera.wheelPrecision = 100;
                 camera.lowerRadiusLimit = 3;
@@ -101,7 +121,7 @@ class BabylonRender extends TvAlpineHTMLElement {
 
             createModel() {
                 BABYLON.SceneLoader
-                .ImportMeshAsync('', './src/3d/', 'smartphone.glb')
+                .ImportMeshAsync('', './src/3d/', 'smartphone_two_textured.glb')
                 .then((result) => {
                     result.meshes.forEach( (mesh, idx) => {
                         mesh.scaling = new BABYLON.Vector3(0.9, 0.9, 0.9);
@@ -119,11 +139,9 @@ class BabylonRender extends TvAlpineHTMLElement {
 
             applySkin() {
                 if (!this.mainMaterialLink || !this.meshes.length) return;
-                this.meshes.forEach(mesh => {
-                    const newTexture = new BABYLON.Texture(
-                        "./src/3d/smartphone/skin_naruto.jpg",
-                        mesh.getScene()
-                    );
+                this.meshes.forEach((mesh, idx) => {
+                    if (idx !== 0) return;
+                    const newTexture = new BABYLON.Texture("./src/3d/smartphone/skin_naruto.jpg", mesh.getScene());
                     if (mesh.material instanceof BABYLON.PBRMaterial) {
                         mesh.material.albedoTexture = newTexture;
                     } else if (mesh.material instanceof BABYLON.StandardMaterial) {
@@ -132,17 +150,26 @@ class BabylonRender extends TvAlpineHTMLElement {
                 });
             },
 
+            getResultByPercentage(percentage, totalNumber) {
+                return Math.floor((percentage / 100) * totalNumber);
+            },
+
+            handleImageInputImagePosition() {
+                this.loadInputImage(null, true);
+            },
+
             handleImageInput() {
                 this.imageInput = this.$el.querySelector("#load-image");
                 this.imageInputCanvas = this.$el.querySelector("#fetch-image"); 
                 this.imageInputCanvas.width = 512;
-                this.imageInputCanvas.height = 512;
+                this.imageInputCanvas.height = 1087;
                 this.imageInput.addEventListener('change', this.loadInputImage.bind(this));
             },
 
-            loadInputImage(e) {
-                const file = e.target.files[e.target.files.length - 1];
+            loadInputImage(e, isWatched) {
+                const file = e ? e.target.files[e.target.files.length - 1] : this.imageAttachment;
                 if (!file) return;
+                this.imageAttachment = file;
 
                 const reader = new FileReader();
                 reader.onload = (e) => {
@@ -151,29 +178,93 @@ class BabylonRender extends TvAlpineHTMLElement {
                     const img = new Image();
                     img.onload = () => {
                         ctx.clearRect(0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
-                        ctx.drawImage(img, 0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
-                        this.handleInputImageTexture();
+                        const scaleFactor = this.catchedTextureScale / 100;
+                        const canvasWidth = this.imageInputCanvas.width;
+                        const canvasHeight = this.imageInputCanvas.height;
+                        const proportion = img.width / img.height;
+                        let imgWidth = img.width;
+                        let imgHeight = img.height;
+                        imgHeight = canvasHeight * scaleFactor;
+                        imgWidth = Math.floor(imgHeight * proportion);
+
+                        const shiftX = this.getResultByPercentage(this.catchedTextureX, imgWidth);
+                        const shiftY = this.getResultByPercentage(this.catchedTextureY, imgHeight);
+                        ctx.save();
+                        ctx.rotate(this.catchedTextureRotate * Math.PI / 180);
+                        ctx.drawImage(img, shiftX, shiftY, imgWidth, imgHeight);
+                        ctx.restore();
+                        if (isWatched) {
+                            if (this.applyingTimeout) return;
+                            this.applyingTimeout = setTimeout(() => {
+                                this.handleInputImageTexture(isWatched);
+                                this.applyingTimeout = null;
+                            }, this.applyingDebounceMs);
+                        } else {
+                            this.handleInputImageTexture();
+                        }
                     };
                     img.src = base64;
                 };
                 reader.readAsDataURL(file);
             },
             
-            handleInputImageTexture() {
-                if (!this.mainMaterialLink || !this.meshes.length) return;
+            handleInputImageTexture(isWatched) {
+                if (!this.mainMaterialLink || !this.meshes.length || (isWatched && !this.catchedTexture)) return;
                 
                 const dataURL = this.imageInputCanvas.toDataURL('image/png');
+                if (isWatched) {
+                    this.catchedTexture.updateURL(dataURL);
+                    return;
+                }
+
                 const textureId = "extCanvasTex_" + Date.now();
-                const tex = BABYLON.Texture.CreateFromBase64String(dataURL, textureId, this.scene, true, false);
+                this.catchedTexture = BABYLON.Texture.CreateFromBase64String(dataURL, textureId, this.scene, true, false);
+                /*
+                this.catchedTexture.uOffset = this.catchedTextureX / 100; 
+                this.catchedTexture.vOffset = this.catchedTextureY / 100;
+                this.catchedTexture.uScale = this.catchedTextureScaleX / 100;
+                this.catchedTexture.vScale = this.catchedTextureScaleY / 100;;
+                this.catchedTexture.wAng = this.catchedTextureRotate * (Math.PI / 180);
+                */
+                // Disable tiles
+                this.catchedTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+                this.catchedTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+
                 this.meshes.forEach((mesh, idx) => {
                     if (idx !== 0) return;
                     const mat = mesh.material;
                     if (mat && mat.getClassName && mat.getClassName() === "PBRMetallicRoughnessMaterial") {
-                        mat.baseTexture = tex;
+                        mat.baseTexture = this.catchedTexture;
                     } else if (mat instanceof BABYLON.PBRMaterial) {
-                        mat.albedoTexture = tex;
+                        mat.albedoTexture = this.catchedTexture;
                     } else if (mat instanceof BABYLON.StandardMaterial) {
-                        mat.diffuseTexture = tex;
+                        mat.diffuseTexture = this.catchedTexture;
+                    }
+                });
+
+                if (!isWatched) {
+                    this.rotateCameraTo(210);
+                }
+            },
+
+            rotateCameraTo(targetAlphaDegrees) {
+                const targetAlpha = targetAlphaDegrees * (Math.PI / 180);
+                let observer = null;
+                const stopAnimationOnInteraction = () => {
+                    if (observer) {
+                        this.scene.onBeforeRenderObservable.remove(observer);
+                        observer = null;
+                    }
+                    this.canvas.removeEventListener("pointerdown", stopAnimationOnInteraction);
+                    this.canvas.removeEventListener("wheel", stopAnimationOnInteraction);
+                };
+                this.canvas.addEventListener("pointerdown", stopAnimationOnInteraction);
+                this.canvas.addEventListener("wheel", stopAnimationOnInteraction);
+                observer = this.scene.onBeforeRenderObservable.add(() => {
+                    this.camera.alpha = BABYLON.Scalar.Lerp(this.camera.alpha, targetAlpha, 0.05);
+                    if (Math.abs(this.camera.alpha - targetAlpha) < 0.001) {
+                        this.camera.alpha = targetAlpha;
+                        stopAnimationOnInteraction(); 
                     }
                 });
             }
