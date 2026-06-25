@@ -3,25 +3,29 @@ class BabylonRender extends TvAlpineHTMLElement {
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
     TV_HTML = /*html*/`
-        <!--
-        <img src="/src/3d/smartphone/preview.png" width="300" height="300" 
-            title="Smartphone preview"
-            x-show="!isAllScriptsFetched"
-        />
-        -->
         <div class="flex gap-8 items-center">
-            <canvas id="main-canvas" style="outline:none;"></canvas>
+            <div style="width:300px; height: 300px; position:relative;">
+                <img src="/src/3d/smartphone/preview.png" width="300" height="300" 
+                    title="Smartphone preview"
+                    x-show="!isAllScriptsFetched"
+                    style="position: absolute; top:0; left:0; width: 300px; height: 300px;"
+                />
+                <canvas id="main-canvas" style="outline:none;"></canvas>
+            </div>
             <canvas id="fetch-image" class="border-2 border-gray-600"
-                style="width: 141px; height: 300px; border-radius: 10px; background-color:#000;"></canvas>
+                style="width: 141px; height: 300px; border-radius: 10px; border: 2px solid #555; background-color:#000;"
+                x-show="catchedTexture"></canvas>
         </div>
         <button @click="applySkin()">Apply</button>
         <input id="load-image" type="file" />
-        <div class="flex flex-col items-center">
-            <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" />
-            <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" />
-            <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
-            <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
-        </div>
+        <template x-if="catchedTexture">
+            <div class="flex flex-col items-center">
+                <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" />
+                <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" />
+                <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
+                <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
+            </div>
+        </template>
     `
 
     initBabylonRenderComponent() {
@@ -71,6 +75,10 @@ class BabylonRender extends TvAlpineHTMLElement {
                     addScriptByIndex(fetched);
                 }
                 const addScriptByIndex = (idx) => {
+                    if (document.head.querySelector('script[src="' + this.libs[idx] + '"]')) {
+                        handleLoad.call(this);
+                        return;
+                    }
                     let newScript = document.createElement('script');
                     newScript.src = this.libs[idx];
                     newScript.onload = handleLoad.bind(this);
