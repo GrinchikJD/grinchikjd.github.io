@@ -29,7 +29,7 @@ input[type="range"]:focus {
     --track-background-color-active: #fff;
 
     --range-thumb-radius: 12px;
-    --range-thumb-color: #3b82f6;
+    --range-thumb-color: #ffffff99;
     --range-thumb-color-hover: #2563eb;
     --range-thumb-color-grab: #1d4ed8;
     --range-thumb-border: 1px solid #eee;

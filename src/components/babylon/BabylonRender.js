@@ -6,11 +6,15 @@ class BabylonRender extends TvAlpineHTMLElement {
         <div class="flex gap-8 items-center justify-center">
             <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
                 style="position: relative;"
-                :class="{ 'animate-pulse rounded-md' : !isAllScriptsFetched }"
+                :class="{ 
+                    'animate-pulse rounded-md' : !isAllScriptsFetched, 
+                    'cursor-grab': (isAllScriptsFetched && !isGrabbing),
+                    'cursor-grabbing': (isAllScriptsFetched && isGrabbing)
+                }"
                 class="flex items-center justify-center"
             >
                 <img src="/src/svg/blocks-wave.svg" alt="Loading..." width="32" height="32" 
-                    class="svg-icon absolute z-10"
+                    class="svg-icon absolute z-10 pointer-events-none"
                     x-show="!isAllScriptsFetched" fetchpriority="high" loading="eager"
                 />
                 <img src="/src/3d/smartphone/preview.webp" 
@@ -20,10 +24,11 @@ class BabylonRender extends TvAlpineHTMLElement {
                     x-show="!isAllScriptsFetched"
                     style="position: absolute; top:0; left:0;"
                     :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
+                    class="pointer-events-none"
                 />
                 <canvas id="main-canvas" style="outline:none;"></canvas>
             </div>
-            <div class="flex items-center justify-end relative"
+            <div class="flex items-center justify-end relative cursor-move"
                 x-show="catchedTexture"
             >
                 <div class="phone-blueprint-preview border-2 border-gray-600
@@ -60,6 +65,7 @@ class BabylonRender extends TvAlpineHTMLElement {
             babylonConfig: {
                 w: 300, h: 300
             },
+            isGrabbing: false,
             mainMaterialLink: null,
             meshes: [],
             libs: [
@@ -141,6 +147,9 @@ class BabylonRender extends TvAlpineHTMLElement {
                 camera.wheelPrecision = 100;
                 camera.lowerRadiusLimit = 3;
                 camera.upperRadiusLimit = 6;
+
+                scene.onPointerDown = () => { this.isGrabbing = true; };
+                window.addEventListener('mousemove', () => { this.isGrabbing = false; });
 
                 const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(-1.1, 0.5, 0.6), scene);
                 light.position = new BABYLON.Vector3(0, 1, 0);

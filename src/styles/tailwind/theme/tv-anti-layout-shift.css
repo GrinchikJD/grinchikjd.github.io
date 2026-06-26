@@ -3,7 +3,11 @@
 /** Fetching elements styles */
 tv-email:not([x-data]),
 tv-babylon-render:not([x-data]) {
-    @apply animate-pulse bg-slate-600 rounded-md flex items-center justify-center;
+    @apply animate-pulse bg-slate-600 rounded-md flex items-center justify-center relative;
+
+    &:after {
+        @apply content-[''] flex border-l-2 border-white w-4 aspect-square rounded-full animate-spin;
+    }
 }
 
 
