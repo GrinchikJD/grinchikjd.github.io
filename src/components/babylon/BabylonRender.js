@@ -58,10 +58,10 @@ class BabylonRender extends TvAlpineHTMLElement {
                 this.canvas.height = 300;
                 this.fetchScripts(this.startRender.bind(this));
                 this.handleImageInput();
-                this.$watch('catchedTextureX', this.handleImageInputImagePosition.bind(this));
-                this.$watch('catchedTextureY', this.handleImageInputImagePosition.bind(this));
-                this.$watch('catchedTextureScale', this.handleImageInputImagePosition.bind(this));
-                this.$watch('catchedTextureRotate', this.handleImageInputImagePosition.bind(this));
+                ['catchedTextureX', 'catchedTextureY', 'catchedTextureScale', 'catchedTextureRotate']
+                .forEach(variable => {
+                    this.$watch(variable, this.handleImageInputImagePosition.bind(this));
+                });
             },
 
             fetchScripts(callback) {
