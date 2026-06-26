@@ -19,8 +19,7 @@ module.exports = {
     },
     content: [
         "../../../*.html",
-        "../../../*.js",
-        "../../../src/**/*.js"
+        "../../../src/components/**/*.js"
     ],
     plugins: [],
 }

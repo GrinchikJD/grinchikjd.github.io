@@ -3,25 +3,48 @@ class BabylonRender extends TvAlpineHTMLElement {
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
     TV_HTML = /*html*/`
-        <div class="flex gap-8 items-center">
-            <div style="width:300px; height: 300px; position:relative;">
-                <img src="/src/3d/smartphone/preview.png" width="300" height="300" 
+        <div class="flex gap-8 items-center justify-center">
+            <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
+                style="position: relative;"
+                :class="{ 'animate-pulse rounded-md' : !isAllScriptsFetched }"
+                class="flex items-center justify-center"
+            >
+                <img src="/src/svg/blocks-wave.svg" alt="Loading..." width="32" height="32" 
+                    class="svg-icon absolute z-10"
+                    x-show="!isAllScriptsFetched" fetchpriority="high" loading="eager"
+                />
+                <img src="/src/3d/smartphone/preview.webp" 
+                    :width="babylonConfig.w" :height="babylonConfig.h" 
                     title="Smartphone preview"
+                    alt="Smartphone preview"
                     x-show="!isAllScriptsFetched"
-                    style="position: absolute; top:0; left:0; width: 300px; height: 300px;"
+                    style="position: absolute; top:0; left:0;"
+                    :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
                 />
                 <canvas id="main-canvas" style="outline:none;"></canvas>
             </div>
-            <canvas id="fetch-image" class="border-2 border-gray-600"
-                style="width: 141px; height: 300px; border-radius: 10px; border: 2px solid #555; background-color:#000;"
-                x-show="catchedTexture"></canvas>
+            <div class="flex items-center justify-end relative"
+                x-show="catchedTexture"
+            >
+                <div class="phone-blueprint-preview border-2 border-gray-600
+                        overflow-hidden flex items-center justify-center"
+                    style="width: 141px; height: 300px; border-radius: 10px; background-color:#000;"
+                >
+                    <canvas id="fetch-image" style="width: 141px; height: 300px;"></canvas>
+                </div>
+                <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" 
+                    class="absolute w-full -bottom-1 z-10"
+                />
+                <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" 
+                    class="absolute !w-[300px] z-10 rotate-90 translate-x-[153px]"
+                />
+            </div>
         </div>
         <button @click="applySkin()">Apply</button>
         <input id="load-image" type="file" />
         <template x-if="catchedTexture">
             <div class="flex flex-col items-center">
-                <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" />
-                <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" />
+                
                 <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
                 <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
             </div>
@@ -34,6 +57,9 @@ class BabylonRender extends TvAlpineHTMLElement {
             engine: null,
             scene: null,
             camera: null,
+            babylonConfig: {
+                w: 300, h: 300
+            },
             mainMaterialLink: null,
             meshes: [],
             libs: [

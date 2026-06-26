@@ -7,3 +7,88 @@ h1 {
 
     text-shadow: 0 0 50px #2454ad;
 }
+
+/* Clear base styles for a range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+}
+input[type="range"]:focus {
+  outline: none;
+}
+
+/* ==========================================
+   TRACK
+   ========================================== */
+:root {
+    --range-track-height: 4px;
+    --range-track-margin: -4px;
+    --track-background-color: #99999911;
+    --track-background-color-active: #fff;
+
+    --range-thumb-radius: 12px;
+    --range-thumb-color: #3b82f6;
+    --range-thumb-color-hover: #2563eb;
+    --range-thumb-color-grab: #1d4ed8;
+    --range-thumb-border: 1px solid #eee;
+}
+/* Chrome, Safari, Edge and Opera */
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: var(--range-track-height);
+    background: var(--track-background-color);
+    border-radius: 9999px;
+    transition: background 0.15s ease;
+}
+/* Для Firefox */
+input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: var(--range-track-height);
+    background: var(--track-background-color);
+    border-radius: 9999px;
+    transition: background 0.15s ease;
+}
+input[type="range"]:hover::-webkit-slider-runnable-track {
+    background: var(--track-background-color-active);
+}
+
+/* ======== THUMB ======== */
+/* Chrome, Safari, Edge and Opera */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: var(--range-thumb-radius); /* Размеры кругляшка */
+    width: var(--range-thumb-radius);
+    border-radius: 50%;
+    background: var(--range-thumb-color); /* Наш фирменный цвет (blue-500) */
+    border: var(--range-thumb-border); /* Белая аккуратная рамка */
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* Легкая тень */
+    cursor: grab;
+    margin-top: var(--range-track-margin); /* Сдвиг вверх, чтобы выровнять по центру дорожки ((высота_дорожки 8px / 2) - (высота_бегунка 24px / 2)) */
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+/* Firefox */
+input[type="range"]::-moz-range-thumb {
+    height: var(--range-thumb-radius);
+    width: var(--range-thumb-radius);
+    border-radius: 50%;
+    background: var(--range-thumb-color);
+    border: var(--range-thumb-border);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    cursor: grab;
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--range-thumb-color-hover);
+    transform: scale(1.1);
+}
+input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    background: var(--range-thumb-color-grab);
+}
+input[type="range"]::-moz-range-thumb:hover {
+    background: var(--range-thumb-color-hover);
+    transform: scale(1.1);
+}

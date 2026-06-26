@@ -1,6 +1,7 @@
+@import "./theme/tv-anti-layout-shift.css";
 @import "./theme/fonts.css";
 @import "./theme/page.css";
-@import "./theme/tv-anti-layout-shift.css";
+@import "./theme/babylon-render.css";
 
 @tailwind base;
 @tailwind components;

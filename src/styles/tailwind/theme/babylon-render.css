@@ -1,0 +1,8 @@
+.phone-blueprint-preview {
+    @apply relative;
+
+    &:after {
+        @apply content-[''] flex w-[53px] h-[80px] z-10 absolute top-[7px] left-[8px] rounded-[18px]
+            bg-[#9998] shadow-md;
+    }
+}
