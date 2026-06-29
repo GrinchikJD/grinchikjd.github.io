@@ -107,11 +107,14 @@ var $tv = (function() {
                 if (!self.config.renderAll) {
                     let checkComponent = document.querySelector(el.define);
                     if (!checkComponent) { return false; }
+                    if (!this.config.waitForEveryone && checkComponent.getAttribute('loading') === 'lazy') {
+                        el.isLazyLoad = true;
+                        el.element = checkComponent;
+                        this.registerLazyload.call(this, el);
+                        return false;
+                    }
                 }
-                setTimeout(
-                    this.handleScriptFetch.bind(this, el, idx), 
-                    0
-                );
+                setTimeout(this.handleScriptFetch.bind(this, el, idx), 0);
                 return true;
             });
         },
@@ -134,6 +137,23 @@ var $tv = (function() {
             newScript.onload = () => {
                 this.renderComponent(el.file);
             }
+        },
+
+        registerLazyload: async function(el) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    el.element.removeAttribute('loading');
+                    this.imports.push({ define: el.define, file: el.file });
+                    this.initTv();
+                    observer.unobserve(entry.target);
+                });
+            }, {
+                root: null,
+                rootMargin: '100px',
+                threshold: 0.1
+            });
+            observer.observe(el.element);
         },
 
         extendClass: function(classObject) {
@@ -236,7 +256,9 @@ var $tv = (function() {
             if (this.config.cache) {
                 this.createStorageCache();
             }
-            this.$afterMethods.forEach((callback) => callback());
+            this.$afterMethods = this.$afterMethods.filter(callback => {
+                callback(); return false;
+            });
             this.handleInteraction();
         },
 
