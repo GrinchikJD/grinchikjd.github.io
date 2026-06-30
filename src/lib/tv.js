@@ -78,6 +78,7 @@ var $tv = (function() {
             waitForEveryone: false
         },
         imports: [],
+        lazyImports: [],
         links: {},
         linksLoaded: 0,
         isInitialized: false,
@@ -115,6 +116,7 @@ var $tv = (function() {
                         el.isLazyLoad = true;
                         checkComponent.style.display = "none";
                         el.element = checkComponent;
+                        this.lazyImports.push(el);
                         this.registerLazyload.call(this, el);
                         this.$after(() => {
                             el.element.style.display = '';
@@ -314,6 +316,13 @@ var $tv = (function() {
                 return;
             }
             this.$interactMethods.push(callback);
+        },
+
+        $lazyImport: async function(elDefine) {
+            const findImport = this.lazyImports.find(el => elDefine === el.define);
+            if (!findImport) return;
+            this.import(findImport);
+            this.initTv();
         }
     }
 })();
