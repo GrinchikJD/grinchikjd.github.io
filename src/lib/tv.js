@@ -7,11 +7,11 @@ class TvAlpineHTMLElement extends HTMLElement {
     DEPS = [];
     DEPS_WAIT_NUM = 0;
     DEPS_LOADED = 0;
-    LEGACY_HTML = '';
+    LEGACY_HTML = null;
     TV_HTML = '';
     constructor() {
         super();
-        this.LEGACY_HTML = this.innerHTML;
+        this.LEGACY_HTML = Array.from(this.querySelectorAll('*'));
     }
     bindAlpineComponent() {
         if (this.DEPS_WAIT_NUM !== this.DEPS_LOADED) return;
@@ -64,6 +64,10 @@ class TvAlpineHTMLElement extends HTMLElement {
         });
         if (waitForResources) return;
         this.bindAlpineComponent();
+
+        const container = this.querySelector('tv-legacy-html');
+        if (!container) return;
+        this.LEGACY_HTML.forEach(child => container.appendChild(child));
     }
     disconnectedCallback() {}
 }
@@ -109,8 +113,12 @@ var $tv = (function() {
                     if (!checkComponent) { return false; }
                     if (!this.config.waitForEveryone && checkComponent.getAttribute('loading') === 'lazy') {
                         el.isLazyLoad = true;
+                        checkComponent.style.display = "none";
                         el.element = checkComponent;
                         this.registerLazyload.call(this, el);
+                        this.$after(() => {
+                            el.element.style.display = '';
+                        });
                         return false;
                     }
                 }
