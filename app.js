@@ -5,6 +5,8 @@
 $tv.setConfig({ waitForEveryone: false });
 $tv.import({ define: 'tv-email', file: '/src/components/other/FormSpree'});
 $tv.import({ define: 'tv-button', file: '/src/components/other/Button'});
+$tv.import({ define: 'tv-dropdownlist', file: '/src/components/other/DropdownList'});
+$tv.import({ define: 'tv-dropdown', file: '/src/components/other/Dropdown'});
 $tv.import({ define: 'tv-babylon-render', file: '/src/components/babylon/BabylonRender'});
 $tv.import({ define: 'tv-three-render', file: '/src/components/three/ThreeRender'});
 

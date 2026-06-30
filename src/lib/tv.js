@@ -112,9 +112,12 @@ var $tv = (function() {
                 if (!self.config.renderAll) {
                     let checkComponent = document.querySelector(el.define);
                     if (!checkComponent) { return false; }
-                    if (!this.config.waitForEveryone && checkComponent.getAttribute('loading') === 'lazy') {
+                    const loadingType = checkComponent.getAttribute('loading');
+                    if (!this.config.waitForEveryone && (loadingType === 'lazy' || loadingType === 'defer')) {
                         el.isLazyLoad = true;
-                        checkComponent.style.display = "none";
+                        if (loadingType === 'defer') {
+                            checkComponent.style.display = "none";
+                        }
                         el.element = checkComponent;
                         this.lazyImports.push(el);
                         this.registerLazyload.call(this, el);
@@ -318,7 +321,7 @@ var $tv = (function() {
             this.$interactMethods.push(callback);
         },
 
-        $lazyImport: async function(elDefine) {
+        $deferImport: async function(elDefine) {
             const findImport = this.lazyImports.find(el => elDefine === el.define);
             if (!findImport) return;
             this.import(findImport);

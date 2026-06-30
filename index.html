@@ -17,14 +17,22 @@
         <div class="flex flex-col gap-8">
             <div class="flex items-center justify-center w-full">
                 <div class="flex flex-col gap-8">
-                    <h1 class="text-4xl">Dzmitryi Hrynchyk</h1>
+                    <h1 class="text-4xl font-bold">Dzmitryi Hrynchyk</h1>
                 </div>
             </div>
-            <div>
-                <tv-babylon-render></tv-babylon-render>
-            </div>
-            <tv-email></tv-email>
-            <tv-three-render loading="lazy"></tv-three-render>
+            <tv-dropdownlist>
+                <tv-babylon-render loading="defer"></tv-babylon-render>
+            </tv-dropdownlist>
+            <tv-email loading="lazy"></tv-email>
+
+            <!--
+            <tv-dropdown title="Check my button 1">
+                <span>What</span>
+            </tv-dropdown>
+            <tv-dropdown title="Dropdown">
+                <tv-three-render loading="lazy"></tv-three-render>
+            </tv-dropdown>
+            -->
         </div>
     </body>
 </html>
