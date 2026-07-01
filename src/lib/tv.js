@@ -4,6 +4,7 @@
 class TvHTMLElement extends HTMLElement {
     LEGACY_HTML = null;
     TV_HTML = '';
+    ELEMENT_ATTRIBUTES = [];
     constructor() {
         super();
     }
@@ -24,11 +25,15 @@ class TvHTMLElement extends HTMLElement {
     }
     connectedCallback() {
         this.bindHtml();
+        this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
+            for (let keyCode in attrConf) {
+                 this.setAttribute(keyCode, attrConf[keyCode]);
+            }
+        });
     }
 }
 class TvAlpineHTMLElement extends TvHTMLElement {
     ALPINE_COMPONENT_KEY = null; 
-    ELEMENT_ATTRIBUTES = [];
     DEPS = [];
     DEPS_WAIT_NUM = 0;
     DEPS_LOADED = 0;
@@ -48,12 +53,6 @@ class TvAlpineHTMLElement extends TvHTMLElement {
         window.fetchedTvDepsScripts = window.fetchedTvDepsScripts
             ? window.fetchedTvDepsScripts
             : {};
-
-        this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
-            for (let keyCode in attrConf) {
-                 this.setAttribute(keyCode, attrConf[keyCode]);
-            }
-        });
 
         this.DEPS.forEach(attrConf => {
             for (let keyCode in attrConf) {
