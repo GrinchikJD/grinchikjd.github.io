@@ -30,9 +30,11 @@ class TvHTMLElement extends HTMLElement {
                 const element = this.querySelector(el.define);
                 if (!element) return true;
                 el.element = element;
-                $tv.import(el); $tv.initTv();
+                $tv.import(el);
                 return false;
             });
+            if (!$tv.missedImports.length) return;
+            $tv.initTv();
         }
         this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
             for (let keyCode in attrConf) {
@@ -250,8 +252,11 @@ var $tv = (function() {
         renderComponent: async function(filePath){
             // Async render of single component
             let self = this;
-            let componentClassSource = $tv.imports.find((el) => {
-                return el.file === filePath;
+            let componentClassSource = null;
+            $tv.imports = $tv.imports.filter((el) => {
+                if (el.file !== filePath) return true;
+                componentClassSource = el;
+                return false;
             });
             if (!componentClassSource) {
                 return;
