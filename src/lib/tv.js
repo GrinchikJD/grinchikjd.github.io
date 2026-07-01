@@ -16,11 +16,11 @@ class TvHTMLElement extends HTMLElement {
             this.LEGACY_HTML.forEach((child, idx) => {
                 const checkIdxContainer = this.querySelector('tv-legacy-html-' + idx);
                 if (!checkIdxContainer) return;
-                checkIdxContainer.appendChild(child);
+                checkIdxContainer.replaceWith(child);
             });
             return;
         };
-        this.LEGACY_HTML.forEach(child => container.appendChild(child));
+        container.replaceWith(...this.LEGACY_HTML);
     }
     connectedCallback() {
         this.bindHtml();
