@@ -25,6 +25,15 @@ class TvHTMLElement extends HTMLElement {
     }
     connectedCallback() {
         this.bindHtml();
+        if ($tv.missedImports.length) {
+            $tv.missedImports = $tv.missedImports.filter(el => {
+                const element = this.querySelector(el.define);
+                if (!element) return true;
+                el.element = element;
+                $tv.import(el); $tv.initTv();
+                return false;
+            });
+        }
         this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
             for (let keyCode in attrConf) {
                  this.setAttribute(keyCode, attrConf[keyCode]);
@@ -94,6 +103,7 @@ var $tv = (function() {
         },
         imports: [],
         lazyImports: [],
+        missedImports: [],
         links: {},
         linksLoaded: 0,
         isInitialized: false,
@@ -125,8 +135,10 @@ var $tv = (function() {
             let self = this;
             $tv.imports = $tv.imports.filter((el, idx) => {
                 if (!self.config.renderAll) {
-                    let checkComponent = document.querySelector(el.define);
-                    if (!checkComponent) { return false; }
+                    let checkComponent = el.element ? el.element : document.querySelector(el.define);
+                    if (!checkComponent) { 
+                        this.missedImports.push(el); return false; 
+                    }
                     const loadingType = checkComponent.getAttribute('loading');
                     if (!this.config.waitForEveryone && (loadingType === 'lazy' || loadingType === 'defer')) {
                         el.isLazyLoad = true;
