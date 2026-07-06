@@ -1,0 +1,52 @@
+{
+	"TV.js + Alpine.js Component": {
+		"scope": "javascript",
+		"prefix": "tv.init.alpine",
+		"body": [
+			"class $1 extends TvAlpineHTMLElement {",
+            "",
+            "    ALPINE_COMPONENT_KEY = 'init$1Component';",
+            "",
+            "    DEPS = []; // exmple: [{ 'text/css' : 'web/css/scene.css' }]",
+            "",
+            "    ELEMENT_ATTRIBUTES = [{ 'x-bind' : 'eventListeners' }]",
+            "",
+            "    constructor() {",
+            "        super();",
+            "    }",
+            "",
+            "    TV_HTML = ($) => /*html*/`",
+            "        <div x-text=\"value\"></div>;",
+            "        <tv-childs></tv-childs>",
+            "    `",
+            "",
+            "    init$1Component($) {",
+            "        return {",
+            "            value: 'Test value',",
+            "            init() {",
+            "                this.value = $(this.\\$el, 'title'); // Get attribute of html element",
+            "            }",
+            "            eventListeners: {",
+            "               ['@android-accelerometer.window'](e) {}",
+            "            }",
+            "        }",
+            "    }",
+            "",
+            "    connectedCallback() {",
+            "        super.connectedCallback();",
+            "    }",
+			"}",
+            "\\$tv.setComponent($1);",
+			"$2"
+		],
+		"description": "Add TVjs + Alpine.js component"
+	},
+    "TV.js import sample into App config": {
+		"scope": "javascript,html",
+		"prefix": "tv.import",
+		"body": [
+			"\\$tv.import({ define: 'tv-$1', file: 'web/js/components/content/$2'});"
+		],
+		"description": "Import link for TV.js component"
+	}
+}
