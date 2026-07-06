@@ -5,17 +5,16 @@ class TvHTMLElement extends HTMLElement {
     LEGACY_HTML = null;
     TV_HTML = '';
     ELEMENT_ATTRIBUTES = [];
-    constructor() {
-        super();
-    }
-    bindHtml() {
-        this.LEGACY_HTML = this.innerHTML ? Array.from(this.querySelectorAll('*')) : [];
+    _bindHtml() {
+        this.LEGACY_HTML = this.innerHTML ? Array.from(this.children) : [];
         if (!this.TV_HTML) return;
-        this.innerHTML = this.TV_HTML;
-        const container = this.LEGACY_HTML.length ? this.querySelector('tv-legacy-html') : null;
+        this.innerHTML = typeof this.TV_HTML === 'function' 
+            ? this.TV_HTML(this.$)
+            : this.TV_HTML;
+        const container = this.LEGACY_HTML.length ? this.querySelector('tv-childs') : null;
         if (!container) {
             this.LEGACY_HTML.forEach((child, idx) => {
-                const checkIdxContainer = this.querySelector('tv-legacy-html-' + idx);
+                const checkIdxContainer = this.querySelector('tv-child-' + idx);
                 if (!checkIdxContainer) return;
                 checkIdxContainer.replaceWith(child);
             });
@@ -24,18 +23,7 @@ class TvHTMLElement extends HTMLElement {
         container.replaceWith(...this.LEGACY_HTML);
     }
     connectedCallback() {
-        this.bindHtml();
-        if ($tv.missedImports.length) {
-            $tv.missedImports = $tv.missedImports.filter(el => {
-                const element = this.querySelector(el.define);
-                if (!element) return true;
-                el.element = element;
-                $tv.import(el);
-                return false;
-            });
-            if (!$tv.missedImports.length) return;
-            $tv.initTv();
-        }
+        this._bindHtml();
         this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
             for (let keyCode in attrConf) {
                  this.setAttribute(keyCode, attrConf[keyCode]);
@@ -48,13 +36,10 @@ class TvAlpineHTMLElement extends TvHTMLElement {
     DEPS = [];
     DEPS_WAIT_NUM = 0;
     DEPS_LOADED = 0;
-    constructor() {
-        super();
-    }
     bindAlpineComponent() {
         if (this.DEPS_WAIT_NUM !== this.DEPS_LOADED) return;
         if (this.ALPINE_COMPONENT_KEY) {
-            $tv.$bind(this.ALPINE_COMPONENT_KEY, this[this.ALPINE_COMPONENT_KEY].bind(this)); 
+            $tv.$bind(this.ALPINE_COMPONENT_KEY, this[this.ALPINE_COMPONENT_KEY].bind(this, this.$attr)); 
             this.setAttribute('x-data', '$tv.' + this.ALPINE_COMPONENT_KEY);
         }
     }
@@ -62,9 +47,7 @@ class TvAlpineHTMLElement extends TvHTMLElement {
         super.connectedCallback();
         let waitForResources = false;
         window.fetchedTvDepsScripts = window.fetchedTvDepsScripts
-            ? window.fetchedTvDepsScripts
-            : {};
-
+            ? window.fetchedTvDepsScripts : {};
         this.DEPS.forEach(attrConf => {
             for (let keyCode in attrConf) {
                 let element = null;
@@ -99,68 +82,78 @@ class TvAlpineHTMLElement extends TvHTMLElement {
 }
 var $tv = (function() {
     return {
+        domObserver: null,
         config: {
-            renderAll: false,
             waitForEveryone: false
         },
         imports: [],
         lazyImports: [],
-        missedImports: [],
+        lazyImportsTags: [],
         links: {},
         linksLoaded: 0,
         isInitialized: false,
         renderedComponentsNumber: 0,
         fetchedTags: [],
+        fetchedClasses: [],
         cacheBank: {},
         $afterMethods: [],
         $interactMethods: [],
 
-        setComponent: async function(comp){
-            this.links = {...this.links, [comp.name]: comp};
-            this.linksLoaded++;
-            if ( this.linksLoaded === this.imports.length ) {
-                this.isInitialized = true;
-                
-                if (!this.config.waitForEveryone) {
-                    return;
-                }
-                this.renderAllComponents();
-                this.afterRender();
+        startPending: (function(){
+            window.addEventListener('load', async function(){
+                $tv.initTv();
+            });
+        })(),
+        initTv: async function() {
+            const registeredTags = this.imports.map(el => el.define).join(', ');
+            if (registeredTags) {
+                document.querySelectorAll(registeredTags).forEach(element => this.initSingleComponent(element));
             }
+            this.startObserver();
         },
-
-        import: async function(arg){
-            this.imports.push(arg);
-        },
-
-        initTv: async function(){
-            let self = this;
-            $tv.imports = $tv.imports.filter((el, idx) => {
-                if (!self.config.renderAll) {
-                    let checkComponent = el.element ? el.element : document.querySelector(el.define);
-                    if (!checkComponent) { 
-                        this.missedImports.push(el); return false; 
-                    }
-                    const loadingType = checkComponent.getAttribute('loading');
-                    if (!this.config.waitForEveryone && (loadingType === 'lazy' || loadingType === 'defer')) {
-                        el.isLazyLoad = true;
-                        if (loadingType === 'defer') {
-                            checkComponent.style.display = "none";
-                        }
-                        el.element = checkComponent;
-                        this.lazyImports.push(el);
-                        this.registerLazyload.call(this, el);
-                        this.$after(() => {
-                            el.element.style.display = '';
+        startObserver: function() {
+            if (this.domObserver) return;
+            this.domObserver = new MutationObserver((mutationsList) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length) {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType !== Node.ELEMENT_NODE) return;
+                            this.checkAndHandleNode(node);
                         });
-                        return false;
                     }
                 }
-                setTimeout(this.handleScriptFetch.bind(this, el, idx), 0);
-                return true;
+            });
+            this.domObserver.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['loading']
             });
         },
-
+        checkAndHandleNode: function(node) {
+            const registeredTags = this.imports.map(el => el.define).join(', ');
+            if (!registeredTags) return;
+            if (node.matches && node.matches(registeredTags)) {
+                this.initSingleComponent(node);
+            }
+            if (node.querySelectorAll) {
+                const foundNested = node.querySelectorAll(registeredTags);
+                foundNested.forEach(child => this.initSingleComponent(child));
+            }
+        },
+        initSingleComponent: function(element) {
+            const tag = element.localName;
+            if (this.fetchedTags.includes(tag)) return;
+            let config = this.imports.find(el => el.define === tag);
+            if (!config) return;
+            const loadingType = element.getAttribute('loading');
+            if (loadingType === 'lazy' || loadingType === 'defer') {
+                config.element = element;
+                this.registerLazyload(config);
+                return;
+            }
+            this.handleScriptFetch(config);
+        },
         handleScriptFetch: async function(el, idx) {
             if (this.fetchedTags.includes(el.define)) return;
             this.fetchedTags.push(el.define);
@@ -173,15 +166,16 @@ var $tv = (function() {
     
             document.head.appendChild(newScript);
 
-            if (this.config.waitForEveryone) {
-                return;
-            }
+            if (this.config.waitForEveryone) return;
             newScript.onload = () => {
                 this.renderComponent(el.file);
             }
         },
-
         registerLazyload: async function(el) {
+            if (this.lazyImportsTags.includes(el.define)) return;
+            this.lazyImportsTags.push(el.define);
+            this.lazyImports.push(el.element);
+            el.element.style.display = "none";
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (!entry.isIntersecting) return;
@@ -197,49 +191,48 @@ var $tv = (function() {
             });
             observer.observe(el.element);
         },
-
+        setComponent: async function(comp){
+            this.links = {...this.links, [comp.name]: comp};
+            this.linksLoaded++;
+            if ( this.linksLoaded === this.fetchedTags.length ) {
+                this.isInitialized = true;
+                if (!this.config.waitForEveryone) {
+                    return;
+                }
+                this.renderAllComponents();
+                this.afterRender();
+            }
+        },
+        import: async function(arg){
+            this.imports.push(arg);
+        },
         extendClass: function(classObject) {
-            classObject.prototype.$rerender = function(){
-                
+            classObject.prototype.$attr = (context, attributeCode) => {
+                return context.getAttribute(attributeCode) ?? '';
             }
-            classObject.prototype.$ = function(attributeCode){
-                return this.getAttribute(attributeCode) ?? '';
-            }
-            classObject.prototype.$setVar = function(code, value){
-                this.$vars = this.$vars ? this.$vars : {};
-                if (this.$vars[code]) {
-                    return;
-                }
-                this.$vars[code] = value;
-            }
-            classObject.prototype.$var = function(code){
-                return this.$vars[code];
-            }
-            classObject.prototype.$click = function(code, callback){
-                if (!code || typeof callback !== 'function') {
-                    return;
-                }
-                /* Bind methods after all tv-components render */
-                $tv.$after(() => {
-                    let clickTargets = this.querySelectorAll('['+code+']');
-                    let extendedCallback = () => {
-                        callback.call(this);
-                        this.$rerender();
+            Object.defineProperty(classObject.prototype, '$', {
+                get: function() {
+                    const attrs = {};
+                    for (let i = 0; i < this.attributes.length; i++) {
+                        const attr = this.attributes[i];
+                        attrs[attr.name] = attr.value;
                     }
-                    clickTargets.forEach(
-                        clickTarget => clickTarget.addEventListener('click', extendedCallback)
-                    );
-                });
-            }
+                    return attrs;
+                },
+                configurable: true
+            });
             return classObject;
         },
-
-        bindComponentClass: async function(componentConfig, strName){
+        bindComponentClass: async function(componentConfig, strName) {
+            if (
+                !this.fetchedTags.includes(componentConfig.define)
+                || this.fetchedClasses.includes(componentConfig.define)
+            ) return;
+            this.fetchedClasses.push(componentConfig.define);
             const extendedClass = this.extendClass($tv.links[strName]);
             customElements.define(componentConfig.define, extendedClass);
         },
-
-        renderAllComponents: async function(){
+        renderAllComponents: async function() {
             // Render for all components at once
             let self = this;
             $tv.imports.forEach(async (el) => {
@@ -248,7 +241,6 @@ var $tv = (function() {
                 this.bindComponentClass(el, strName);
             });
         },
-
         renderComponent: async function(filePath){
             // Async render of single component
             let self = this;
@@ -268,20 +260,13 @@ var $tv = (function() {
             this.renderedComponentsNumber++;
             this.handlePostRender();
         },
-
         handlePostRender: async function() {
-            if (this.renderedComponentsNumber !== this.imports.length) {
+            if (this.renderedComponentsNumber !== this.fetchedTags.length) {
                 return;
             }
+            this.lazyImports.forEach(element => element.style.display = '');
             this.afterRender();
         },
-
-        startPending: (function(){
-            window.addEventListener('load', async function(){
-                $tv.initTv();
-            });
-        })(),
-
         createStorageCache: async function(){
             if (localStorage.getItem('app_cache_bank')) {
                 return;
@@ -296,7 +281,6 @@ var $tv = (function() {
             let cacheToSave = JSON.stringify(this.cacheBank);
             localStorage.setItem('app_cache_bank', cacheToSave)
         },
-
         afterRender: async function(){
             if (this.config.cache) {
                 this.createStorageCache();
@@ -306,58 +290,43 @@ var $tv = (function() {
             });
             this.handleInteraction();
         },
-
         handleInteraction: async function (){
             const eventsArray = ['wheel', 'touchstart', 'scroll', 'keydown', 'mouseover'];
             const self = this;
-
             function removeInteractionEvents() {
                 eventsArray.forEach((eventType) => {
                     window.removeEventListener(eventType, handleInteractionBehavior);
                 });
             }
-
             function handleInteractionBehavior() {
                 removeInteractionEvents();
                 self.$interactMethods.forEach(callback => callback());
             }
-
             eventsArray.forEach((eventType) => {
                 window.addEventListener(eventType, handleInteractionBehavior)
             });
         },
-
         setConfig: function(config){
             let self = this;
             self.config = { ...self.config, ...config };
         },
-
         $bind: function(componentName, component){
             if (this[componentName] || !component) {
                 return;
             }
             this[componentName] = component;
         },
-
         $after: function(callback){
             if (typeof callback !== 'function') {
                 return;
             }
             this.$afterMethods.push(callback);
         },
-
         $interact: function(callback){
             if (typeof callback !== 'function') {
                 return;
             }
             this.$interactMethods.push(callback);
-        },
-
-        $deferImport: async function(elDefine) {
-            const findImport = this.lazyImports.find(el => elDefine === el.define);
-            if (!findImport) return;
-            this.import(findImport);
-            this.initTv();
         }
     }
 })();
