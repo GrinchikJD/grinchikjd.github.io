@@ -1,4 +1,4 @@
-/** TV - simple small lib for page-render by JS components 
+/** TV | v 2.0.1 - simple small lib for page-render by JS components 
  * Creator: Hrynchyk Dzmitryi
 */
 class TvHTMLElement extends HTMLElement {
@@ -24,6 +24,7 @@ class TvHTMLElement extends HTMLElement {
     }
     connectedCallback() {
         this._bindHtml();
+        this.setAttribute('tv-binded', 1);
         this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
             for (let keyCode in attrConf) {
                  this.setAttribute(keyCode, attrConf[keyCode]);
@@ -89,6 +90,7 @@ var $tv = (function() {
         imports: [],
         lazyImports: [],
         lazyImportsTags: [],
+        deferImports: [],
         links: {},
         linksLoaded: 0,
         isInitialized: false,
@@ -121,6 +123,9 @@ var $tv = (function() {
                             this.checkAndHandleNode(node);
                         });
                     }
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'loading') {
+                        this.handleAttributeChange(mutation.target);
+                    }
                 }
             });
             this.domObserver.observe(document.body, {
@@ -129,6 +134,10 @@ var $tv = (function() {
                 attributes: true,
                 attributeFilter: ['loading']
             });
+        },
+        handleAttributeChange: function(element) {
+            if (element.hasAttribute('loading')) return;
+            this.initSingleComponent(element);
         },
         checkAndHandleNode: function(node) {
             const registeredTags = this.imports.map(el => el.define).join(', ');
@@ -149,6 +158,7 @@ var $tv = (function() {
             const loadingType = element.getAttribute('loading');
             if (loadingType === 'lazy' || loadingType === 'defer') {
                 config.element = element;
+                config.loading = loadingType;
                 this.registerLazyload(config);
                 return;
             }
@@ -176,14 +186,17 @@ var $tv = (function() {
             this.lazyImportsTags.push(el.define);
             this.lazyImports.push(el.element);
             el.element.style.display = "none";
+            if (el.loading === 'defer') this.deferImports.push(el);
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
+                    if (el.loading === 'lazy') el.element.style.display = '';
                     if (!entry.isIntersecting) return;
                     el.element.removeAttribute('loading');
+                    this.lazyImportsTags.filter(elTag => elTag !== el.define);
                     this.imports.push({ define: el.define, file: el.file });
-                    this.initTv();
                     observer.unobserve(entry.target);
                 });
+                this.initTv();
             }, {
                 root: null,
                 rootMargin: '100px',
@@ -289,6 +302,7 @@ var $tv = (function() {
                 callback(); return false;
             });
             this.handleInteraction();
+            this.deferImports.forEach(el => el.element.style.display = '');
         },
         handleInteraction: async function (){
             const eventsArray = ['wheel', 'touchstart', 'scroll', 'keydown', 'mouseover'];
