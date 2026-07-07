@@ -157,10 +157,6 @@ var $tv = (function() {
         },
         registeredElements: [],
         initSingleComponent: function(element, isMutation) {
-            if (this.registeredElements.includes(element)) return;
-            if (!isMutation) {
-                this.registeredElements.push(element);
-            }
             const tag = element.localName;
             if (this.fetchedTags.includes(tag)) return;
             let config = this.imports.find(el => el.define === tag);
