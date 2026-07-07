@@ -1,4 +1,4 @@
-/** TV | v 2.0.1 - simple small lib for page-render by JS components 
+/** TV | v 2.0.2 - simple small lib for page-render by JS components 
  * Creator: Hrynchyk Dzmitryi
 */
 class TvHTMLElement extends HTMLElement {
@@ -84,12 +84,12 @@ class TvAlpineHTMLElement extends TvHTMLElement {
 var $tv = (function() {
     return {
         domObserver: null,
+        debounceTimeout: null,
         config: {
             waitForEveryone: false
         },
         imports: [],
         lazyImports: [],
-        lazyImportsTags: [],
         deferImports: [],
         links: {},
         linksLoaded: 0,
@@ -106,11 +106,12 @@ var $tv = (function() {
                 $tv.initTv();
             });
         })(),
-        initTv: async function() {
+        initTv: async function(node = document) {
             const registeredTags = this.imports.map(el => el.define).join(', ');
             if (registeredTags) {
-                document.querySelectorAll(registeredTags).forEach(element => this.initSingleComponent(element));
+                node.querySelectorAll(registeredTags).forEach(element => this.initSingleComponent(element));
             }
+            if (this.domObserver) return;
             this.startObserver();
         },
         startObserver: function() {
@@ -120,7 +121,7 @@ var $tv = (function() {
                     if (mutation.type === 'childList' && mutation.addedNodes.length) {
                         mutation.addedNodes.forEach(node => {
                             if (node.nodeType !== Node.ELEMENT_NODE) return;
-                            this.checkAndHandleNode(node);
+                            this.checkAndHandleNodeMutation(node);
                         });
                     }
                     if (mutation.type === 'attributes' && mutation.attributeName === 'loading') {
@@ -136,21 +137,30 @@ var $tv = (function() {
             });
         },
         handleAttributeChange: function(element) {
-            if (element.hasAttribute('loading')) return;
             this.initSingleComponent(element);
         },
-        checkAndHandleNode: function(node) {
+        checkAndHandleNodeMutation: function(node) {
             const registeredTags = this.imports.map(el => el.define).join(', ');
             if (!registeredTags) return;
+            let isTvComponent = false;
             if (node.matches && node.matches(registeredTags)) {
+                isTvComponent = true;
                 this.initSingleComponent(node);
             }
-            if (node.querySelectorAll) {
-                const foundNested = node.querySelectorAll(registeredTags);
-                foundNested.forEach(child => this.initSingleComponent(child));
+            if (!isTvComponent && node.querySelectorAll) {
+                clearTimeout(this.debounceTimeout);
+                this.debounceTimeout = setTimeout(() => {
+                    const foundNested = node.querySelectorAll(registeredTags);
+                    foundNested.forEach(child => this.initSingleComponent(child, true));
+                }, 0);
             }
         },
-        initSingleComponent: function(element) {
+        registeredElements: [],
+        initSingleComponent: function(element, isMutation) {
+            if (this.registeredElements.includes(element)) return;
+            if (!isMutation) {
+                this.registeredElements.push(element);
+            }
             const tag = element.localName;
             if (this.fetchedTags.includes(tag)) return;
             let config = this.imports.find(el => el.define === tag);
@@ -159,10 +169,31 @@ var $tv = (function() {
             if (loadingType === 'lazy' || loadingType === 'defer') {
                 config.element = element;
                 config.loading = loadingType;
-                this.registerLazyload(config);
+                this.registerLazyload(config, isMutation);
                 return;
             }
             this.handleScriptFetch(config);
+        },
+        registerLazyload: async function(el, isMutation) {
+            if (this.lazyImports.includes(el.element)) return;
+            this.lazyImports.push(el.element);
+            el.element.style.display = "none";
+            if (el.loading === 'defer') this.deferImports.push(el);
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (el.loading === 'lazy') el.element.style.display = '';
+                    if (!entry.isIntersecting) return;
+                    el.element.removeAttribute('loading');
+                    observer.unobserve(entry.target);
+                });
+            }, {
+                root: null,
+                rootMargin: '100px',
+                threshold: 0.1
+            });
+            observer.observe(el.element);
+            if (!isMutation) return;
+            this.afterRender();
         },
         handleScriptFetch: async function(el, idx) {
             if (this.fetchedTags.includes(el.define)) return;
@@ -180,29 +211,6 @@ var $tv = (function() {
             newScript.onload = () => {
                 this.renderComponent(el.file);
             }
-        },
-        registerLazyload: async function(el) {
-            if (this.lazyImportsTags.includes(el.define)) return;
-            this.lazyImportsTags.push(el.define);
-            this.lazyImports.push(el.element);
-            el.element.style.display = "none";
-            if (el.loading === 'defer') this.deferImports.push(el);
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (el.loading === 'lazy') el.element.style.display = '';
-                    if (!entry.isIntersecting) return;
-                    el.element.removeAttribute('loading');
-                    this.lazyImportsTags.filter(elTag => elTag !== el.define);
-                    this.imports.push({ define: el.define, file: el.file });
-                    observer.unobserve(entry.target);
-                });
-                this.initTv();
-            }, {
-                root: null,
-                rootMargin: '100px',
-                threshold: 0.1
-            });
-            observer.observe(el.element);
         },
         setComponent: async function(comp){
             this.links = {...this.links, [comp.name]: comp};
@@ -266,7 +274,6 @@ var $tv = (function() {
             if (!componentClassSource) {
                 return;
             }
-
             let strName = componentClassSource.file.split('/');
                 strName = strName[strName.length-1];
             this.bindComponentClass(componentClassSource, strName);
@@ -280,24 +287,7 @@ var $tv = (function() {
             this.lazyImports.forEach(element => element.style.display = '');
             this.afterRender();
         },
-        createStorageCache: async function(){
-            if (localStorage.getItem('app_cache_bank')) {
-                return;
-            }
-            this.imports.forEach((el) => {
-                const elementTag = el.define;
-                let elementsHtml = document.querySelectorAll(elementTag);
-                this.cacheBank[elementTag] = [...elementsHtml].reduce((acc, el) => {
-                    return [...acc, el.innerHTML];
-                }, []);
-            });
-            let cacheToSave = JSON.stringify(this.cacheBank);
-            localStorage.setItem('app_cache_bank', cacheToSave)
-        },
         afterRender: async function(){
-            if (this.config.cache) {
-                this.createStorageCache();
-            }
             this.$afterMethods = this.$afterMethods.filter(callback => {
                 callback(); return false;
             });
