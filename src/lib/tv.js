@@ -23,6 +23,7 @@ class TvHTMLElement extends HTMLElement {
         container.replaceWith(...this.LEGACY_HTML);
     }
     connectedCallback() {
+        console.log(this.tagName ,'Bindend')
         this._bindHtml();
         this.setAttribute('tv-binded', 1);
         this.ELEMENT_ATTRIBUTES.forEach(attrConf => {
@@ -155,7 +156,6 @@ var $tv = (function() {
                 }, 0);
             }
         },
-        registeredElements: [],
         initSingleComponent: function(element, isMutation) {
             const tag = element.localName;
             if (this.fetchedTags.includes(tag)) return;
