@@ -55,7 +55,7 @@ class TvAlpineHTMLElement extends TvHTMLElement {
             for (let keyCode in attrConf) {
                 let element = null;
                 let srcPath = attrConf[keyCode];
-                let srcId = srcPath.split('.')[0].split('/').join('-');
+                let srcId = 'tv-dep-' + btoa(srcPath).replace(/[^a-z0-9]/ig, '');
                 if (window.fetchedTvDepsScripts[srcId]) return;
                 if (keyCode === 'text/css') {
                     element = document.createElement('link');
