@@ -1,29 +1,21 @@
-class Button extends TvAlpineHTMLElement {
+class Button extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initButtonComponent';
 
-    ELEMENT_ATTRIBUTES = [
-        { 'x-bind' : 'eventListeners' },
-        { 'class' : 'flex gap-4' }
-    ];
+    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex gap-4' }];
 
-    constructor() {
-        super();
-    }
-
-    TV_HTML = /*html*/`
-        <button @click="counter()">${this.LEGACY_HTML}</button>
+    EZ_HTML = ({title}) => /*html*/`
+        <button @click="counter()" class="font-bold">
+            ${title}
+        </button>
         <div x-text="value"></div>
     `
 
-    initButtonComponent() {
+    initButtonComponent($) {
         return {
             value: 0,
             counter() {
                 this.value++;
-            },
-            eventListeners: {
-               ['@android-accelerometer.window'](e) {}
             }
         }
     }
@@ -32,4 +24,4 @@ class Button extends TvAlpineHTMLElement {
          super.connectedCallback();
     }
 }
-$tv.setComponent(Button);
+$ez.setComponent(Button);

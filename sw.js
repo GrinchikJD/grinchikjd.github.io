@@ -7,7 +7,7 @@ const PWA_URLS_TO_CACHE = [
     '/index.html',
     '/src/styles/styles.css',
     '/src/fonts/Montserrat-Regular.ttf',
-    '/src/lib/tv.js',
+    '/src/lib/ezland.js',
     '/src/lib/alpine.js',
     '/app.js',
     '/src/components/other/FormSpree.js',

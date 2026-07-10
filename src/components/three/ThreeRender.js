@@ -1,8 +1,8 @@
-class ThreeRender extends TvAlpineHTMLElement {
+class ThreeRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initThreeRenderComponent';
 
-    TV_HTML = /*html*/`
+    EZ_HTML = /*html*/`
         <div class="flex gap-8 items-center justify-center">
             <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
                 style="position: relative;"
@@ -314,4 +314,4 @@ class ThreeRender extends TvAlpineHTMLElement {
          super.connectedCallback();
     }
 }
-$tv.setComponent(ThreeRender);
+$ez.setComponent(ThreeRender);

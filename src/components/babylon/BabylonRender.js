@@ -1,8 +1,8 @@
-class BabylonRender extends TvAlpineHTMLElement {
+class BabylonRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
-    TV_HTML = /*html*/`
+    EZ_HTML = /*html*/`
         <div class="flex gap-8 items-center justify-center">
             <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
                 style="position: relative;"
@@ -318,4 +318,4 @@ class BabylonRender extends TvAlpineHTMLElement {
          super.connectedCallback();
     }
 }
-$tv.setComponent(BabylonRender);
+$ez.setComponent(BabylonRender);

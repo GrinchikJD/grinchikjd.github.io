@@ -1,0 +1,27 @@
+/** Styles for reducing layout shift of dynamic components */
+
+/** Fetching elements styles */
+ez-email:not([ez-binded]),
+ez-dropdownlist:not([ez-binded]),
+ez-three-render:not([ez-binded]),
+ez-babylon-render:not([ez-binded]) {
+    @apply bg-slate-600 rounded-md flex items-center justify-center relative overflow-hidden;
+}
+
+
+/** Reduce shifting */
+ez-email,
+ez-three-render,
+ez-dropdownlist,
+ez-babylon-render {
+    @apply block;
+}
+
+ez-email {
+    @apply min-h-[115px];
+}
+ez-dropdownlist,
+ez-three-render,
+ez-babylon-render {
+    @apply min-h-[394px];
+}

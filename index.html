@@ -5,33 +5,38 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Dmitry Hrynchyk | Frontend Developer | Magento 2 / Mage-OS Developer | Alpine.js | Tailwind | Hyva Developer">
         <title>Frontend Developer | Magento 2 / Mage-OS Developer</title>
-        <script src="/src/lib/tv.js"></script>
-        <script defer src="/src/lib/alpine.js"></script>
-        <script src="/app.js"></script>
+        <link rel="preload" href="/src/fonts/Montserrat-Regular.ttf" as="font" type="font/ttf" crossorigin />
         <link href="/src/styles/styles.css" rel="stylesheet" type="text/css"/>
+        <script defer src="/src/lib/ezland.js"></script>
+        <script defer src="/src/lib/alpine.js"></script>
+        <script defer src="/app.js"></script>
     </head>
     <body>
         <header>
-            <!-- <tv-header></tv-header> -->
+            <!-- <ez-header></ez-header> -->
         </header>
         <div class="flex flex-col gap-8">
-            <div class="flex items-center justify-center w-full">
-                <div class="flex flex-col gap-8">
-                    <h1 class="text-4xl font-bold">Dzmitryi Hrynchyk</h1>
-                </div>
-            </div>
-            <tv-dropdownlist>
-                <tv-babylon-render loading="defer"></tv-babylon-render>
-            </tv-dropdownlist>
-            <tv-email loading="lazy"></tv-email>
+            <h1 class="text-4xl font-bold">Dzmitryi Hrynchyk</h1>
 
+            <ez-shell title="Hello">
+                <ez-babylon-render loading="defer"></ez-babylon-render>
+                <ez-email loading="defer"></ez-email>
+                <ez-button title="Press me"></ez-button>
+                <ez-button title="And me"></ez-button>
+            </ez-shell>
+
+            <ez-dropdownlist json='[
+                { "title": "Show 3d", "component": "ez-babylon-render"},
+                { "title": "Show Email", "component": "ez-email" }
+            ]'></ez-dropdownlist>
+            <ez-dropdownlist json='[
+                { "title": "Fetch Products", "component": "ez-products-grid"}
+            ]'></ez-dropdownlist>
             <!--
-            <tv-dropdown title="Check my button 1">
-                <span>What</span>
-            </tv-dropdown>
-            <tv-dropdown title="Dropdown">
-                <tv-three-render loading="lazy"></tv-three-render>
-            </tv-dropdown>
+            <ez-dropdownlist></ez-dropdownlist>
+            <ez-dropdownlist></ez-dropdownlist>
+            <ez-dropdownlist loading="lazy"></ez-dropdownlist>
+            <ez-products-grid loading="lazy"></ez-products-grid>
             -->
         </div>
     </body>

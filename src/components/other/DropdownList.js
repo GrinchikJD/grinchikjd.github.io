@@ -1,25 +1,35 @@
-class DropdownList extends TvAlpineHTMLElement {
+class DropdownList extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initDropdownListComponent';
 
-    TV_HTML = /*html*/`
-    <button @click="setActive(1)">Show 3d</button>
-    <div x-show="currentIndex === 1">
-        <tv-legacy-html></tv-legacy-html>
-    </div>
+    EZ_HTML = ($) => /*html*/`
+        <div>
+            ${JSON.parse($.json || "[]").map(this.renderItemsHtml).join('')}
+        </div>
+    `;
 
-    <button @click="setActive(2)">Show Email</button>
-    <template x-if="currentIndex === 2">
-        <tv-email x-bind:loaded="$tv.$deferImport('tv-email')"></tv-email>
-    </template>
+    constructor() {
+        super();
+    }
 
-    `
+    renderItemsHtml(obj, idx) {
+        return /*html*/`
+            <button @click="setActive(${idx})">
+                ${obj.title}
+            </button>
+            <template x-if="currentIndex === ${idx}">
+                <div>
+                    <${obj.component}></${obj.component}>
+                </div>
+            </template>
+        `
+    }
 
     initDropdownListComponent() {
         return {
-            currentIndex: 0,
+            currentIndex: false,
             setActive(idx) {
-                this.currentIndex = idx === this.currentIndex ? 0 : idx;
+                this.currentIndex = idx === this.currentIndex ? false : idx;
             }
         }
     }
@@ -28,4 +38,4 @@ class DropdownList extends TvAlpineHTMLElement {
         super.connectedCallback();
     }
 }
-$tv.setComponent(DropdownList);
+$ez.setComponent(DropdownList);

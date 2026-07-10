@@ -1,4 +1,4 @@
-class FormSpree extends TvAlpineHTMLElement {
+class FormSpree extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initFormSpreeComponent';
 
@@ -8,7 +8,7 @@ class FormSpree extends TvAlpineHTMLElement {
         super();
     }
 
-    TV_HTML = /*html*/`
+    EZ_HTML = /*html*/`
     <form action="https://formspree.io/f/xeewlvvv" method="POST" @submit.prevent="submitForm">
         <template x-if="!isSent">
             <section class="flex flex-col gap-2">
@@ -20,7 +20,6 @@ class FormSpree extends TvAlpineHTMLElement {
         <template x-if="isSent">
             <div>Message has been sent</div>
         </template>
-        <!-- <tv-button>Test</tv-button> -->
     </form>
     `
 
@@ -76,10 +75,6 @@ class FormSpree extends TvAlpineHTMLElement {
 
     connectedCallback() {
         super.connectedCallback();
-
-        // $tv.$interact(() => {
-        //     $tv.import({ define: 'tv-button', file: '/src/components/other/Button'}).finally($tv.initTv());
-        // });
     }
 }
-$tv.setComponent(FormSpree);
+$ez.setComponent(FormSpree);

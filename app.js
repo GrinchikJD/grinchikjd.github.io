@@ -1,15 +1,13 @@
-//Import all components
-// tv.js will only load what is needed
-
-//$tv.setConfig({ renderAll: false });
-$tv.setConfig({ waitForEveryone: false });
-$tv.import({ define: 'tv-email', file: '/src/components/other/FormSpree'});
-$tv.import({ define: 'tv-button', file: '/src/components/other/Button'});
-$tv.import({ define: 'tv-dropdownlist', file: '/src/components/other/DropdownList'});
-$tv.import({ define: 'tv-dropdown', file: '/src/components/other/Dropdown'});
-$tv.import({ define: 'tv-babylon-render', file: '/src/components/babylon/BabylonRender'});
-$tv.import({ define: 'tv-three-render', file: '/src/components/three/ThreeRender'});
-
+$ez.import([
+    { define: 'ez-email', file: '/src/components/other/FormSpree'},
+    { define: 'ez-button', file: '/src/components/other/Button'},
+    { define: 'ez-dropdownlist', file: '/src/components/other/DropdownList'},
+    { define: 'ez-shell', file: '/src/components/other/Shell'},
+    { define: 'ez-babylon-render', file: '/src/components/babylon/BabylonRender'},
+    { define: 'ez-three-render', file: '/src/components/three/ThreeRender'},
+    { define: 'ez-products-grid', file: '/src/components/products/ProductsGrid'},
+    { define: 'ez-product', file: '/src/components/products/ProductItem'}
+]);
 
 // Service Worker for PWA cache
 /* TODO: Add service worker
