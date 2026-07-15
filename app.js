@@ -1,4 +1,7 @@
 $ez.import([
+    { define: 'ez-header', file: '/src/components/page/Header'},
+    { define: 'ez-footer', file: '/src/components/page/Footer'},
+    { define: 'ez-showcase', file: '/src/components/page/Showcase'},
     { define: 'ez-email', file: '/src/components/other/FormSpree'},
     { define: 'ez-button', file: '/src/components/other/Button'},
     { define: 'ez-dropdownlist', file: '/src/components/other/DropdownList'},

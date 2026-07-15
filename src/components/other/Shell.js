@@ -10,7 +10,8 @@ class Shell extends EzAlpineHTMLElement {
 
     EZ_HTML = ({title}) => /*html*/`
     <div>
-        ${title ? `<h1 @click="isOpened = !isOpened">${title}</h1>` : ``}
+        ${title ? `<h1>${title}</h1>` : ``}
+        <button @click="isOpened = !isOpened">Click</button>
         <div x-show="isOpened">
             <div>
                 <ez-childs></ez-childs>

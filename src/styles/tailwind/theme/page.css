@@ -1,11 +1,31 @@
 body {
-    @apply bg-gray-900 h-full flex items-center justify-center min-h-screen;
+    @apply bg-theme h-full flex flex-col items-center justify-start min-h-screen;
+}
+header {
+    @apply flex items-center justify-start w-full text-white font-heading;
+}
+header,
+footer {
+    @apply min-h-[50px];
+}
+footer {
+    @apply mt-auto w-full;
+}
+main {
+    @apply w-full px-3 py-8 flex-grow flex flex-col justify-center gap-4;
 }
 
 h1 {
-    @apply text-gray-300 font-heading;
+    @apply text-gray-400 font-heading;
+    /* text-shadow: 0 0 50px #2454ad; */
+}
 
-    text-shadow: 0 0 50px #2454ad;
+footer a {
+    @apply text-accent hover:text-accent-50 transition-all duration-200;
+
+    &:hover {
+        text-shadow: 0 0 10px black;
+    }
 }
 
 /* Clear base styles for a range input */

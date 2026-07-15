@@ -1,6 +1,9 @@
 @import "./theme/ez-anti-layout-shift.css";
 @import "./theme/fonts.css";
 @import "./theme/page.css";
+@import "./theme/header.css";
+@import "./theme/animation.css";
+@import "./theme/showcase.css";
 @import "./theme/babylon-render.css";
 
 @tailwind base;

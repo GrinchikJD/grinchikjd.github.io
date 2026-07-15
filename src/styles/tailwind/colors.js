@@ -1,6 +1,10 @@
 module.exports = {
     theme: {
-        'DEFAULT': '#f00',
-        50: '#f00'
+        "DEFAULT":"#2e3239",
+        50: "#41454e"
+    },
+    accent: {
+        "DEFAULT":"#5effa3",
+        50: "#6eff6c"
     }
 }

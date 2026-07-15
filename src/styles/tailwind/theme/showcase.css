@@ -1,0 +1,6 @@
+.showcase-grid {
+    grid-template-columns: 200px 200px;
+}
+.showcase-grid .showcase-item:nth-child(2) {
+    @apply col-span-2;
+}

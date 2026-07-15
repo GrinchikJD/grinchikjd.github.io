@@ -18,9 +18,7 @@ class DropdownList extends EzAlpineHTMLElement {
                 ${obj.title}
             </button>
             <template x-if="currentIndex === ${idx}">
-                <div>
-                    <${obj.component}></${obj.component}>
-                </div>
+                <${obj.component}></${obj.component}>
             </template>
         `
     }

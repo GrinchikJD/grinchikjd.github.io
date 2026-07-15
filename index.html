@@ -13,31 +13,44 @@
     </head>
     <body>
         <header>
-            <!-- <ez-header></ez-header> -->
+            <ez-header></ez-header>
         </header>
-        <div class="flex flex-col gap-8">
-            <h1 class="text-4xl font-bold">Dzmitryi Hrynchyk</h1>
-
+        <main role="main">
+            <div class="text-white">
+                <h1 class="text-4xl font-bold">Dzmitryi Hrynchyk</h1>
+                <code>Hello. I'm <span class="text-accent">Front-End Developer</span></code>
+            </div>
+            <ez-showcase></ez-showcase>
+            <!-- 
             <ez-shell title="Hello">
                 <ez-babylon-render loading="defer"></ez-babylon-render>
                 <ez-email loading="defer"></ez-email>
                 <ez-button title="Press me"></ez-button>
                 <ez-button title="And me"></ez-button>
-            </ez-shell>
-
+            </ez-shell>  
+                       
             <ez-dropdownlist json='[
                 { "title": "Show 3d", "component": "ez-babylon-render"},
-                { "title": "Show Email", "component": "ez-email" }
+                { "title": "Show Email", "component": "ez-email" },
+                { "title": "Three Render", "component": "ez-three-render" },
+                { "title": "Button", "component": "ez-button" },
+                { "title": "Products", "component": "ez-products-grid" }
             ]'></ez-dropdownlist>
+            -->
+            
+            <!--
             <ez-dropdownlist json='[
                 { "title": "Fetch Products", "component": "ez-products-grid"}
             ]'></ez-dropdownlist>
-            <!--
+            
             <ez-dropdownlist></ez-dropdownlist>
             <ez-dropdownlist></ez-dropdownlist>
             <ez-dropdownlist loading="lazy"></ez-dropdownlist>
             <ez-products-grid loading="lazy"></ez-products-grid>
             -->
-        </div>
+        </main>
+        <footer>
+            <ez-footer></ez-footer>
+        </footer>
     </body>
 </html>

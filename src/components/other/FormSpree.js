@@ -10,16 +10,16 @@ class FormSpree extends EzAlpineHTMLElement {
 
     EZ_HTML = /*html*/`
     <form action="https://formspree.io/f/xeewlvvv" method="POST" @submit.prevent="submitForm">
-        <template x-if="!isSent">
+        <div x-show="!isSent">
             <section class="flex flex-col gap-2">
                 <input x-model="userEmail" placeholder="Enter Your email" title="Enter Your email" />
                 <textarea x-model="message" placeholder="Your message" title="Enter Your message"></textarea>
                 <button type="submit">Send request</button>
             </section>
-        </template>
-        <template x-if="isSent">
+        </div>
+        <div x-show="isSent">
             <div>Message has been sent</div>
-        </template>
+        </div>
     </form>
     `
 

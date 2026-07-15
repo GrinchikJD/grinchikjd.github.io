@@ -20,7 +20,7 @@ class ProductsGrid extends EzAlpineHTMLElement {
 
     renderItemsHtml(obj, idx) {
         return /*html*/`
-            <ez-product loading="lazy" title="${obj.title}" img="${obj.image}"></ez-product>
+            <ez-product ez-simple="1" loading="lazy" title="${obj.title}" img="${obj.image}"></ez-product>
         `
     }
 

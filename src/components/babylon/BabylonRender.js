@@ -69,8 +69,8 @@ class BabylonRender extends EzAlpineHTMLElement {
             mainMaterialLink: null,
             meshes: [],
             libs: [
-                'src/lib/babylon.js',
-                'src/lib/babylon_import.js'
+                '/src/lib/babylon.js',
+                '/src/lib/babylon_import.js'
             ],
             isAllScriptsFetched: false,
             imageAttachment: null,
@@ -164,7 +164,7 @@ class BabylonRender extends EzAlpineHTMLElement {
 
             createModel() {
                 BABYLON.SceneLoader
-                .ImportMeshAsync('', './src/3d/', 'smartphone_two_textured.glb')
+                .ImportMeshAsync('', '/src/3d/', 'smartphone_two_textured.glb')
                 .then((result) => {
                     result.meshes.forEach( (mesh, idx) => {
                         mesh.scaling = new BABYLON.Vector3(0.9, 0.9, 0.9);
@@ -184,7 +184,7 @@ class BabylonRender extends EzAlpineHTMLElement {
                 if (!this.mainMaterialLink || !this.meshes.length) return;
                 this.meshes.forEach((mesh, idx) => {
                     if (idx !== 0) return;
-                    const newTexture = new BABYLON.Texture("./src/3d/smartphone/skin_naruto.jpg", mesh.getScene());
+                    const newTexture = new BABYLON.Texture("/src/3d/smartphone/skin_naruto.jpg", mesh.getScene());
                     if (mesh.material instanceof BABYLON.PBRMaterial) {
                         mesh.material.albedoTexture = newTexture;
                     } else if (mesh.material instanceof BABYLON.StandardMaterial) {
