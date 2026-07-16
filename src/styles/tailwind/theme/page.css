@@ -24,6 +24,7 @@ footer a {
     @apply text-accent hover:text-accent-50 transition-all duration-200;
 
     &:hover {
+        @apply underline;
         text-shadow: 0 0 10px black;
     }
 }
@@ -111,4 +112,19 @@ input[type="range"]::-webkit-slider-thumb:active {
 input[type="range"]::-moz-range-thumb:hover {
     background: var(--range-thumb-color-hover);
     transform: scale(1.1);
+}
+
+button[disabled] {
+    @apply pointer-events-none opacity-10;
+}
+
+/** Additional styles */
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 }

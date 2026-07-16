@@ -2,7 +2,7 @@ class Header extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initHeaderComponent';
 
-    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex items-center' }];
+    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex items-center w-full justify-between' }];
 
     EZ_HTML = ($) => /*html*/`
     <nav role="navigation flex items-center my-auto">
@@ -22,6 +22,9 @@ class Header extends EzAlpineHTMLElement {
             </template>
         </ul>
     </nav>
+    <div>
+        *
+    </div>
     `
 
     initHeaderComponent($) {

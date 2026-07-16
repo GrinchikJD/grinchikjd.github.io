@@ -1,6 +1,6 @@
 class Footer extends EzHTMLElement {
     EZ_HTML = ($) => /*html*/`
-    <div class="p-3 text-white">
+    <div class="p-3 text-white text-xs">
         <code>
             Powered by <a href="https://ezlandjs.github.io/" 
                 title="EzLand.js official web-page" 

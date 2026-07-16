@@ -10,6 +10,7 @@ const PWA_URLS_TO_CACHE = [
     '/src/lib/ezland.js',
     '/src/lib/alpine.js',
     '/app.js',
+    '/src/components/page/Header.js',
     '/src/components/other/FormSpree.js',
     '/src/components/other/Button.js',
 ];

@@ -4,6 +4,7 @@
 ez-email:not([ez-binded]),
 ez-dropdownlist:not([ez-binded]),
 ez-showcase:not([ez-binded]),
+ez-skills:not([ez-binded]),
 ez-three-render:not([ez-binded]),
 ez-babylon-render:not([ez-binded]) {
     @apply bg-theme-50 rounded-md flex items-center justify-center relative overflow-hidden;
@@ -18,7 +19,10 @@ ez-babylon-render {
 }
 
 ez-showcase {
-    @apply min-h-[400px];
+    @apply min-h-[260px];
+}
+ez-skills {
+    @apply min-h-[80px];
 }
 
 ez-email {
