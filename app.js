@@ -1,4 +1,5 @@
 $ez.import([
+    { define: 'ez-backdrop', file: '/src/components/page/Backdrop'},
     { define: 'ez-header', file: '/src/components/page/Header'},
     { define: 'ez-footer', file: '/src/components/page/Footer'},
     { define: 'ez-showcase', file: '/src/components/page/Showcase'},

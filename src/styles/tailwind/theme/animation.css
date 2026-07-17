@@ -13,6 +13,19 @@ main {
     animation: fadeIn 0.5s ease-out forwards;
 }
 
+@keyframes fadeInOpacity {
+    from {  opacity: 0; }
+    to {    opacity: 1; }
+}
+@keyframes fadeInRotation {
+    from {  opacity: 0; transform: rotate(360deg); }
+    to {    opacity: 1; transform: rotate(0); }
+}
+@keyframes fadeOutRotation {
+    from {        opacity: 1; transform: rotate(0); }
+    to {       opacity: 0; transform: rotate(360deg); }
+}
+
 /** Border Rotation effect */
 @keyframes rotate {
     from    { transform: rotate(0); }

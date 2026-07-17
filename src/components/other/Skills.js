@@ -80,6 +80,7 @@ class Skills extends EzAlpineHTMLElement {
         <span class="font-heading text-lg md:text-xl font-bold">My experience:</span>
         <div class="flex-grow w-1/2 flex items-center relative">
             <button class="${this.SLIDER_BUTTON_CLASS} left-0 -translate-x-1/2"
+                title="Previous slide"
                 @click.debounce.150ms="prevSlide()">
                 ${this.drawSvgWithAdditionalClass('rotate-[270deg]')}   
             </button>
@@ -90,19 +91,22 @@ class Skills extends EzAlpineHTMLElement {
                     ${this.SLIDES.map(item => /*html*/`
                         <div class="js-slide flex w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 shrink-0 snap-start
                              cursor-pointer group py-4 justify-center">
-                            <div class="flex items-center gap-2 px-6 sm:px-4 transition-transform duration-200 group-hover:scale-105
-                                text-shadow-md">
+                            <a href="/zpages/exp.html"
+                                title="Checkout my ${item.title} experience!"
+                                class="flex items-center gap-2 pl-6 pr-8 sm:px-4 transition-transform duration-200 
+                                    group-hover:scale-105 text-shadow-md">
                                 ${this.drawImageByItem(item)}
                                 <div class="flex flex-col">
                                     <span class="font-heading text-sm">${item.title}</span>
                                     ${this.drawSubtitleByItem(item)}
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     `).join('')}
                 </div>
             </div>
-            <button class="${this.SLIDER_BUTTON_CLASS} right-0"
+            <button class="${this.SLIDER_BUTTON_CLASS} right-2" 
+                title="Next slide"
                 @click.debounce.150ms="nextSlide()">
                 ${this.drawSvgWithAdditionalClass('rotate-90')}   
             </button>

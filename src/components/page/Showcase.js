@@ -6,7 +6,7 @@ class Showcase extends EzAlpineHTMLElement {
     <div class="w-full h-full">
         <div class="showcase-grid grid grid-cols-2 md:grid-cols-4 gap-2 h-full">
         <template x-for="(item, idx) in items" :key="idx">
-            <div class="card showcase-item h-[150px] md:h-[250px] py-[2px]">
+            <div class="card showcase-item h-[150px] md:h-auto py-[2px]">
                 <a :href="item.url" :title="'Check the ' + item.title"
                     class="card-content">
                     <div class="flex items-center group w-full h-full overflow-hidden relative rounded-md">
@@ -40,7 +40,7 @@ class Showcase extends EzAlpineHTMLElement {
         return {
             items: [
                 { 
-                    url: "/zpages/3d.html",
+                    url: "/zpages/3d_demo.html",
                     title: "Web 3D Graphics", img: "/src/img/showcase/3dpreview.webp",
                     description: "3D visualization right on Your webpage!",
                     details: `Does Your online store / web-demo / web-game need 3D graphics integration? 
@@ -51,7 +51,7 @@ class Showcase extends EzAlpineHTMLElement {
                     url: "",
                     title: "EzLand.js", img: "/src/img/particles_circle.webp",
                     description: "Need a small landing page? Like this one?",
-                    details: `EzLand.js is my small library for quickly creating server-side landing pages using Web Components. 
+                    details: `EzLand.js is my small library for quickly creating client-side rendering landing pages using Web Components. 
                         You don't need Node.js for this - it's very simple.
                         Check out the demo.`
                 },

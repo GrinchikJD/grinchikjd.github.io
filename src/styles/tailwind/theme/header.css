@@ -27,3 +27,10 @@ header nav .menu-tab.selected {
     /* animation: textMenu 5s linear forwards infinite; */
     animation: menuIn 0.5s ease-out forwards;
 }
+header {
+    @apply sticky top-0 z-50 transition-all duration-500;
+}
+header.is-sticky:not(:has(.js-menu-opened)) {
+    @apply bg-gradient-to-r from-theme to-theme-alpha shadow-lg;
+    will-change: transform;
+}
