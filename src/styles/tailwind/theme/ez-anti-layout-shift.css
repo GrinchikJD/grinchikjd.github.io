@@ -19,7 +19,7 @@ ez-babylon-render {
 }
 
 ez-showcase {
-    @apply min-h-[260px] md:aspect-[980/260];
+    @apply min-h-[308px] md:min-h-[260px] md:aspect-[980/260];
 }
 ez-skills {
     @apply min-h-[80px];
