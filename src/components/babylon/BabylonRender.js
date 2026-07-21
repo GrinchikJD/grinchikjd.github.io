@@ -2,38 +2,79 @@ class BabylonRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
+    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex gap-8 flex-col md:flex-row w-full' }]
+
     EZ_HTML = /*html*/`
-        <div class="flex gap-8 items-center justify-center">
-            <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
-                style="position: relative;"
-                :class="{ 
-                    'animate-pulse rounded-md' : !isAllScriptsFetched, 
-                    'cursor-grab': (isAllScriptsFetched && !isGrabbing),
-                    'cursor-grabbing': (isAllScriptsFetched && isGrabbing)
-                }"
-                class="flex items-center justify-center"
-            >
-                <img src="/src/svg/blocks-wave.svg" alt="Loading..." width="32" height="32" 
-                    class="svg-icon absolute z-10 pointer-events-none"
-                    x-show="!isAllScriptsFetched" fetchpriority="high" loading="eager"
-                />
-                <img src="/src/3d/smartphone/preview.webp" 
-                    :width="babylonConfig.w" :height="babylonConfig.h" 
-                    title="Smartphone preview"
-                    alt="Smartphone preview"
-                    x-show="!isAllScriptsFetched"
-                    style="position: absolute; top:0; left:0;"
-                    :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
-                    class="pointer-events-none"
-                />
-                <canvas id="main-canvas" style="outline:none;"></canvas>
+    <div class="flex items-center">
+        <div :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
+            style="position: relative;"
+            :class="{ 
+                'animate-pulse rounded-md' : !isAllScriptsFetched, 
+                'cursor-grab': (isAllScriptsFetched && !isGrabbing),
+                'cursor-grabbing': (isAllScriptsFetched && isGrabbing)
+            }"
+            class="flex items-center mx-auto justify-center aspect-square max-w-full"
+        >
+            <img src="/src/svg/blocks-wave.svg" alt="Loading..." width="32" height="32" 
+                class="svg-icon absolute z-10 pointer-events-none"
+                x-show="!isAllScriptsFetched || isTexturesLoading" fetchpriority="high" loading="eager"
+            />
+            <img src="/src/3d/smartphone/preview.webp" 
+                :width="babylonConfig.w" :height="babylonConfig.h" 
+                title="Smartphone preview"
+                alt="Smartphone preview"
+                x-show="!isAllScriptsFetched"
+                style="position: absolute; top:0; left:0;"
+                :style="{ width: babylonConfig.w + 'px', height: babylonConfig.h + 'px'}"
+                class="pointer-events-none"
+            />
+            <canvas id="main-canvas" :class="{ 'blur-sm' : isTexturesLoading }"
+                class="w-full md:w-auto"
+                style="outline:none;"></canvas>
+        </div>
+    </div>
+    <div class="flex-grow flex flex-col items-start justify-start px-6 md:p-2 text-white">
+        <h2 class="font-heading font-bold text-2xl text-gray-400 my-2">Customization</h2>
+        <div class="flex flex-col gap-4 my-4">
+        <template x-for="attribute in attributes" :key="attribute.code">
+            <div>
+                <span class="font-heading text-lg font-bold" x-text="attribute.title">Title</span>
+                <div class="flex items-center gap-2 mt-2">
+                    <template x-for="option in attribute.options" :key="option.code">
+                        <button @click="applyTextureByCode(attribute.code, option.code)"
+                            :title="'Select ' + option.code + ' ' + attribute.code"
+                            class="aspect-square w-16 max-w-16 flex items-center justify-center rounded-lg bg-gray-600
+                                transition-all duration-200  hover:outline-white hover:outline overflow-hidden
+                                opacity-50 hover:opacity-100"
+                            :class="{ 
+                                'outline-accent outline bg-gray-400 opacity-100' : isSelectedOption(attribute, option),
+                                'bg-gray-600 opacity-50' : !isSelectedOption(attribute, option)
+                            }"
+                        >
+                            <img width="128" height="128"
+                                :alt="'Select ' + option.code + ' ' + attribute.code"
+                                :src="option.preview"
+                                class="aspect-square w-16 min-w-16 object-cover" 
+                            />
+                        </button>
+                    </template>
+                </div>
             </div>
-            <div class="flex items-center justify-end relative cursor-move"
-                x-show="catchedTexture"
-            >
+        </template>
+        </div>
+        
+        <label for="load-image" class="card rounded-full py-0.5">
+            <div class="card-content text-lg !rounded-full py-1 px-4">
+                Custom Cover
+            </div>
+            <input id="load-image" type="file" class="hidden" />
+        </label>
+
+        <div x-show="catchedTexture">
+            <div class="flex items-center justify-end relative cursor-move">
                 <div class="phone-blueprint-preview border-2 border-gray-600
                         overflow-hidden flex items-center justify-center"
-                    style="width: 141px; height: 300px; border-radius: 10px; background-color:#000;"
+                    style="width: 141px; height: 300px; border-radius: 15px; background-color:#000;"
                 >
                     <canvas id="fetch-image" style="width: 141px; height: 300px;"></canvas>
                 </div>
@@ -44,16 +85,14 @@ class BabylonRender extends EzAlpineHTMLElement {
                     class="absolute !w-[300px] z-10 rotate-90 translate-x-[153px]"
                 />
             </div>
+            <template x-if="catchedTexture">
+                <div class="flex flex-col items-center mt-4">
+                    <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
+                    <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
+                </div>
+            </template>
         </div>
-        <button @click="applySkin()">Apply</button>
-        <input id="load-image" type="file" />
-        <template x-if="catchedTexture">
-            <div class="flex flex-col items-center">
-                
-                <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
-                <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
-            </div>
-        </template>
+    </div>
     `
 
     initBabylonRenderComponent() {
@@ -63,7 +102,7 @@ class BabylonRender extends EzAlpineHTMLElement {
             scene: null,
             camera: null,
             babylonConfig: {
-                w: 300, h: 300
+                w: 400, h: 400
             },
             isGrabbing: false,
             mainMaterialLink: null,
@@ -72,7 +111,23 @@ class BabylonRender extends EzAlpineHTMLElement {
                 '/src/lib/babylon.js',
                 '/src/lib/babylon_import.js'
             ],
+            selectedColor: 'default',
+            selectedSkin: 'default',
+            textureBuffer: {},
+            textureBufferFetchedNum: 0,
+            attributes: [
+                {code: 'color', title: "Color", options: [
+                    { code: 'default', preview: '/src/3d/smartphone/options/color_default.webp' },
+                    { code: 'silver', preview: '/src/3d/smartphone/options/color_silver.webp' },
+                    { code: 'green', preview: '/src/3d/smartphone/options/color_green.webp' },
+                ]},
+                {code: 'skin', title: "Cover texture", options: [
+                    { code: 'default', preview: '/src/3d/smartphone/options/skin_default.webp' },
+                    { code: 'naruto', preview: '/src/3d/smartphone/options/skin_naruto.webp' }
+                ]}
+            ],
             isAllScriptsFetched: false,
+            isTexturesLoading: false,
             imageAttachment: null,
             imageInput: null,
             imageInputCanvas: null,
@@ -81,13 +136,13 @@ class BabylonRender extends EzAlpineHTMLElement {
             catchedTextureY: 0,
             catchedTextureScale: 100,
             catchedTextureRotate: 0,
-            applyingDebounceMs: 1000,
+            applyingDebounceMs: 500,
             applyingTimeout: null,
 
             init() {
                 this.canvas = this.$el.querySelector("#main-canvas");
-                this.canvas.width = 300;
-                this.canvas.height = 300;
+                this.canvas.width = 400;
+                this.canvas.height = 400;
                 this.fetchScripts(this.startRender.bind(this));
                 this.handleImageInput();
                 ['catchedTextureX', 'catchedTextureY', 'catchedTextureScale', 'catchedTextureRotate']
@@ -95,7 +150,15 @@ class BabylonRender extends EzAlpineHTMLElement {
                     this.$watch(variable, this.handleImageInputImagePosition.bind(this));
                 });
             },
-
+            getAttributePreviewSrc(attr, opt) {
+                return '/src/3d/smartphone/options/' + attr.code + '_' + opt.code + '.webp';
+            },
+            isSelectedOption(attr, opt) {
+                if (attr.code === 'color') {
+                    return this.selectedColor === opt.code;
+                }
+                return this.selectedSkin === opt.code;
+            },
             fetchScripts(callback) {
                 const numberToFetch = this.libs.length;
                 let fetched = 0;
@@ -118,7 +181,6 @@ class BabylonRender extends EzAlpineHTMLElement {
                 }
                 addScriptByIndex(fetched);
             },
-
             startRender() {
                 this.engine = new BABYLON.Engine(this.canvas, true, {stencil:true});
                 this.scene = this.createScene();
@@ -134,7 +196,6 @@ class BabylonRender extends EzAlpineHTMLElement {
                     this.scene.render();
                 });
             },
-
             createScene() {
                 var scene = new BABYLON.Scene(this.engine);
                 scene.useRightHandedSystem = true;
@@ -161,7 +222,6 @@ class BabylonRender extends EzAlpineHTMLElement {
 
                 return scene;
             },
-
             createModel() {
                 BABYLON.SceneLoader
                 .ImportMeshAsync('', '/src/3d/', 'smartphone_two_textured.glb')
@@ -179,12 +239,52 @@ class BabylonRender extends EzAlpineHTMLElement {
                     console.log('The entire model has been loaded');
                 });
             },
-
-            applySkin() {
+            applyTextureByCode(attributeCode, optionCode) {
+                this.imageBuffer = null;
+                if (attributeCode === 'color') {
+                    const isResetCustomCover = !!this.catchedTexture;
+                    this.selectedColor = optionCode;
+                    this.applyTexture(attributeCode);
+                    if (!this.imageAttachment) this.applyTexture('skin');
+                    if (isResetCustomCover) {
+                        this.loadInputImage(null, true, 1);
+                    }
+                    return;
+                }
+                this.selectedSkin = optionCode;
+                this.imageAttachment = null;
+                this.catchedTexture = null;
+                this.applyTexture(attributeCode);
+            },
+            applyTexture(attributeCode) {
                 if (!this.mainMaterialLink || !this.meshes.length) return;
+                const isColor = attributeCode === 'color';
+                const src = isColor 
+                    ? "/src/3d/smartphone/color_" + this.selectedColor + ".jpg"
+                    : "/src/3d/smartphone/skin_" 
+                        + (this.selectedSkin !== 'default' ? this.selectedSkin : this.selectedColor) 
+                            + ".jpg";
+                this.textureBuffer[attributeCode] = this.textureBuffer[attributeCode]
+                    ? this.textureBuffer[attributeCode]
+                    : document.createElement('img');
+                this.textureBuffer[attributeCode].src = src;
+                this.isTexturesLoading = true;
+                this.textureBuffer[attributeCode].onload = this.checkAllImagesAreFetched.bind(this, isColor, src);
+            },
+            checkAllImagesAreFetched(isColor, src) {
+                this.textureBufferFetchedNum = 0;
+                this.handleMaterialMeshes(isColor, src);
+                for (const key in this.textureBuffer) {
+                    if (this.textureBuffer[key].complete) this.textureBufferFetchedNum++; 
+                }
+                if (this.textureBufferFetchedNum !== Object.keys(this.textureBuffer).length) return;
+                this.rotateCameraTo(210);
+                this.isTexturesLoading = false;
+            },
+            handleMaterialMeshes(skipFirstMaterial, src) {
                 this.meshes.forEach((mesh, idx) => {
-                    if (idx !== 0) return;
-                    const newTexture = new BABYLON.Texture("/src/3d/smartphone/skin_naruto.jpg", mesh.getScene());
+                    if (skipFirstMaterial ? idx === 0 : idx !== 0) return;
+                    const newTexture = new BABYLON.Texture(src, mesh.getScene());
                     if (mesh.material instanceof BABYLON.PBRMaterial) {
                         mesh.material.albedoTexture = newTexture;
                     } else if (mesh.material instanceof BABYLON.StandardMaterial) {
@@ -192,35 +292,41 @@ class BabylonRender extends EzAlpineHTMLElement {
                     }
                 });
             },
-
             getResultByPercentage(percentage, totalNumber) {
                 return Math.floor((percentage / 100) * totalNumber);
             },
-
             handleImageInputImagePosition() {
                 this.loadInputImage(null, true);
             },
-
             handleImageInput() {
+                if (this.imageInput && this.imageInputCanvas) return;
                 this.imageInput = this.$el.querySelector("#load-image");
                 this.imageInputCanvas = this.$el.querySelector("#fetch-image"); 
+                if (!this.imageInputCanvas || !this.imageInput) return;
                 this.imageInputCanvas.width = 512;
                 this.imageInputCanvas.height = 1087;
                 this.imageInput.addEventListener('change', this.loadInputImage.bind(this));
             },
-
-            loadInputImage(e, isWatched) {
+            getBlueprintCover(callback) {
+                if (this.imageBuffer) return this.imageBuffer;
+                this.imageBuffer = document.createElement('img');
+                this.imageBuffer.src = "/src/3d/smartphone/canvas_bg_" + this.selectedColor + ".jpg";
+                return this.imageBuffer;
+            },
+            loadInputImage(e, isWatched, customTimeoutMs) {
                 const file = e ? e.target.files[e.target.files.length - 1] : this.imageAttachment;
                 if (!file) return;
                 this.imageAttachment = file;
-
+                this.selectedSkin = 'default';
+                const ctx = this.imageInputCanvas.getContext("2d");
                 const reader = new FileReader();
+                const bgCover = this.getBlueprintCover();
                 reader.onload = (e) => {
                     const base64 = e.target.result;
-                    const ctx = this.imageInputCanvas.getContext("2d");
                     const img = new Image();
                     img.onload = () => {
                         ctx.clearRect(0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
+                        ctx.drawImage(bgCover, 0, 0, this.imageInputCanvas.width, this.imageInputCanvas.height);
                         const scaleFactor = this.catchedTextureScale / 100;
                         const canvasWidth = this.imageInputCanvas.width;
                         const canvasHeight = this.imageInputCanvas.height;
@@ -237,11 +343,11 @@ class BabylonRender extends EzAlpineHTMLElement {
                         ctx.drawImage(img, shiftX, shiftY, imgWidth, imgHeight);
                         ctx.restore();
                         if (isWatched) {
-                            if (this.applyingTimeout) return;
+                            clearTimeout(this.applyingTimeout);
                             this.applyingTimeout = setTimeout(() => {
                                 this.handleInputImageTexture(isWatched);
                                 this.applyingTimeout = null;
-                            }, this.applyingDebounceMs);
+                            }, customTimeoutMs ? customTimeoutMs : this.applyingDebounceMs);
                         } else {
                             this.handleInputImageTexture();
                         }
@@ -250,16 +356,13 @@ class BabylonRender extends EzAlpineHTMLElement {
                 };
                 reader.readAsDataURL(file);
             },
-            
             handleInputImageTexture(isWatched) {
                 if (!this.mainMaterialLink || !this.meshes.length || (isWatched && !this.catchedTexture)) return;
-                
                 const dataURL = this.imageInputCanvas.toDataURL('image/png');
                 if (isWatched) {
                     this.catchedTexture.updateURL(dataURL);
                     return;
                 }
-
                 const textureId = "extCanvasTex_" + Date.now();
                 this.catchedTexture = BABYLON.Texture.CreateFromBase64String(dataURL, textureId, this.scene, true, false);
                 /*
@@ -269,10 +372,8 @@ class BabylonRender extends EzAlpineHTMLElement {
                 this.catchedTexture.vScale = this.catchedTextureScaleY / 100;;
                 this.catchedTexture.wAng = this.catchedTextureRotate * (Math.PI / 180);
                 */
-                // Disable tiles
                 this.catchedTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
                 this.catchedTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
-
                 this.meshes.forEach((mesh, idx) => {
                     if (idx !== 0) return;
                     const mat = mesh.material;
@@ -284,10 +385,7 @@ class BabylonRender extends EzAlpineHTMLElement {
                         mat.diffuseTexture = this.catchedTexture;
                     }
                 });
-
-                if (!isWatched) {
-                    this.rotateCameraTo(210);
-                }
+                if (!isWatched) this.rotateCameraTo(210);
             },
 
             rotateCameraTo(targetAlphaDegrees) {

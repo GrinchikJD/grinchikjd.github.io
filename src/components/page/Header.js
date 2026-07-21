@@ -46,11 +46,23 @@ class Header extends EzAlpineHTMLElement {
             ${this.drawMenuIconBySrcAndCondition('/src/svg/menu.svg', '!isMobileOpened')}
             ${this.drawMenuIconBySrcAndCondition('/src/svg/cross.svg', 'isMobileOpened')}
         </div>
-        <span class="capitalize" x-text="menuArr[selectedIdx].title"></span>
+        <span class="capitalize" 
+            x-text="menuArr[selectedIdx]?.title || breadCrumbs[breadCrumbs.length-1]?.title"></span>
     </button>
     <div class="ml-auto z-50">
         *
     </div>
+    <template x-if="breadCrumbs.length">
+        <div class="breadcrumbs px-3 md:px-4 text-xs text-gray-400 flex gap-2 z-10"
+            :class="{ '-translate-x-full' : isMobileOpened }"
+        >
+            <template x-for="(item, idx) in breadCrumbs" :key="idx">
+                <a :href="item.url || ''" class="capitalize"
+                    :class="{ 'text-white' : item.url, 'next-crumb' : idx, 'pointer-events-none': !item.url }"
+                    :title="item.title + ' link'" x-text="item.title"></a>
+            </template>
+        </div>
+    </template>
     `
 
     initHeaderComponent($) {
@@ -60,10 +72,12 @@ class Header extends EzAlpineHTMLElement {
             ahchor: null,
             isScrolled: false,
             isMobileOpened: false,
+            pageTitle: null,
             menuArr: [
                 {title: 'Showcase', url:'/'},
                 {title: 'Contact Me', url:'/zpages/contact.html'}
             ],
+            breadCrumbs: [],
             init(){
                 this.handleActiveMenu();
                 this.initStickyHeader();
@@ -76,6 +90,7 @@ class Header extends EzAlpineHTMLElement {
             handleActiveMenu() {
                 let strPath = window.location.pathname.split('/');
                     strPath = strPath[strPath.length-1];
+                this.setBreadcrumbLink(strPath);
                 if (!strPath) {
                     this.selectedIdx = 0;
                     return;
@@ -86,12 +101,17 @@ class Header extends EzAlpineHTMLElement {
                     }
                 });
                 if (this.selectedIdx || typeof this.selectedIdx === 'number') return;
-                this.setUndefinedLink(strPath);
             },
-            setUndefinedLink(title) {
-                title = title.split('.')[0].replace(/_/gi, ' ');
-                this.menuArr.push({title: ('🗏 ' + title), url: ''});
-                this.selectedIdx = this.menuArr.length - 1;
+            setBreadcrumbLink(strPath) {
+                if (!strPath) return;
+                this.pageTitle = this.pageTitle 
+                    ? this.pageTitle 
+                    : document.head.querySelector('title');
+                const title = this.pageTitle 
+                    ? this.pageTitle.innerText 
+                    : strPath.split('.')[0].replace(/_/gi, ' ');
+                this.breadCrumbs.push({title: "Home", url: '/'});
+                this.breadCrumbs.push({title: (title), url: ''});
             },
             initStickyHeader() {
                 this.header = document.querySelector("header");

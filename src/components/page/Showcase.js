@@ -41,7 +41,7 @@ class Showcase extends EzAlpineHTMLElement {
             items: [
                 { 
                     url: "/zpages/3d_demo.html",
-                    title: "Web 3D Graphics", img: "/src/img/showcase/3dpreview.webp",
+                    title: "Product 3D-preview Demo", img: "/src/img/showcase/3dpreview.webp",
                     description: "3D visualization right on Your webpage!",
                     details: `Does Your online store / web-demo / web-game need 3D graphics integration? 
                         Drawing on my GameDev experience, I can quickly and seamlessly implement any concept You have in mind.

@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Dmitry Hrynchyk | Frontend Developer | Magento 2 / Mage-OS Developer | Alpine.js | Tailwind | Hyva Developer">
-        <title>3D</title>
+        <meta name="theme-color" content="#2e3239">
+        <title>3D Product Preview</title>
         <link rel="preload" href="/src/fonts/Montserrat-Regular.ttf" as="font" type="font/ttf" crossorigin />
         <link href="/src/styles/styles.css" rel="stylesheet" type="text/css"/>
         <script defer src="/src/lib/ezland.js"></script>
@@ -16,8 +17,28 @@
             <ez-header></ez-header>
         </header>
         <main role="main">
-            <h1 class="text-4xl font-bold">3D Demo</h1>
-            <ez-babylon-render></ez-babylon-render>
+            <div class="xl:grid grid-cols-3 grid-rows-3 gap-x-12">
+                <div class="text-white col-start-1 mb-8">
+                    <h1 class="text-4xl font-bold">3D Product Preview</h1>
+                    <span class="font-heading">Customize and view Your product from every angle!</span>
+                </div>
+                <div class="order-3 col-start-2 col-span-2 row-start-1 row-span-3 bg-theme-50
+                    -mx-4 flex items-center shadow-xl
+                    xl:rounded-l-xl xl:-mr-4 xl:ml-0"
+                >
+                    <ez-babylon-render></ez-babylon-render>
+                </div>
+                <code class="text-white col-start-1 row-start-2 row-span-3 flex flex-col gap-2 mt-8">
+                    <p>Вам необходима реализация просмотра товара в трехмерном формате?</p>
+                    <p>Дайте возможность пользователю посмотреть Ваш товар со всех сторон!</p>
+                    <!-- <br/><br/>
+                    <p>Мой опыт в GameDev позволил мне освоить навыки работы с 3D моделированием.</p>
+                    <p>Я отлично разибраюсь в оптимизации отрисовки 3d моделей, материалах и освещении, что поможет
+                        быстро создать легкие, реалистичные модели, с динамическим освещением: от простых товаров,
+                        вроде телефонов, до полноценных комнат и локаций!
+                    </p> -->
+                </code>
+            </div>
         </main>
         <ez-backdrop></ez-backdrop>
         <footer>

@@ -19,6 +19,7 @@ module.exports = {
     },
     content: [
         "../../../*.html",
+        "../../../zpages/*.html",
         "../../../src/components/**/*.js"
     ],
     plugins: [],

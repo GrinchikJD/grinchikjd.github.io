@@ -8,6 +8,7 @@ $ez.import([
     { define: 'ez-button', file: '/src/components/other/Button'},
     { define: 'ez-dropdownlist', file: '/src/components/other/DropdownList'},
     { define: 'ez-shell', file: '/src/components/other/Shell'},
+    { define: 'ez-babylon-control', file: '/src/components/babylon/ProductControl'},
     { define: 'ez-babylon-render', file: '/src/components/babylon/BabylonRender'},
     { define: 'ez-three-render', file: '/src/components/three/ThreeRender'},
     { define: 'ez-products-grid', file: '/src/components/products/ProductsGrid'},

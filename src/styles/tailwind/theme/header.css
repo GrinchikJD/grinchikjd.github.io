@@ -29,8 +29,21 @@ header nav .menu-tab.selected {
 }
 header {
     @apply sticky top-0 z-50 transition-all duration-500;
+
+    .breadcrumbs {
+        @apply opacity-100 translate-y-full pointer-events-auto absolute bottom-0 transition-all;
+    }
+}
+header.is-sticky {
+    .breadcrumbs { 
+        @apply opacity-0 pointer-events-none;
+    }
 }
 header.is-sticky:not(:has(.js-menu-opened)) {
     @apply bg-gradient-to-r from-theme to-theme-alpha shadow-lg;
     will-change: transform;
+}
+.next-crumb:before {
+    @apply mr-2 text-[10px];
+    content: '\27F6';
 }

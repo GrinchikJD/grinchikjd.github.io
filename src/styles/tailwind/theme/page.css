@@ -12,7 +12,7 @@ footer {
     @apply mt-auto w-full;
 }
 main {
-    @apply w-full px-3 py-8 flex-grow flex flex-col justify-center gap-4;
+    @apply w-full px-4 py-8 flex-grow flex flex-col justify-center gap-4;
 }
 
 h1 {

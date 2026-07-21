@@ -41,7 +41,7 @@ class Skills extends EzAlpineHTMLElement {
     ];
 
     ELEMENT_ATTRIBUTES = [
-        { 'class' : 'flex items-center -mx-3 px-3 bg-theme-50 shadow-lg' },
+        { 'class' : 'flex items-center -mx-4 px-4 bg-theme-50 shadow-lg' },
         { '@mouseenter': 'handleHover()' },
         { '@mouseleave.self': 'handleRelease()' }
     ];
@@ -91,7 +91,7 @@ class Skills extends EzAlpineHTMLElement {
                     ${this.SLIDES.map(item => /*html*/`
                         <div class="js-slide flex w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 shrink-0 snap-start
                              cursor-pointer group py-4 justify-center">
-                            <a href="/zpages/exp.html"
+                            <a href="/zpages/experience.html"
                                 title="Checkout my ${item.title} experience!"
                                 class="flex items-center gap-2 pl-6 pr-8 sm:px-4 transition-transform duration-200 
                                     group-hover:scale-105 text-shadow-md">
