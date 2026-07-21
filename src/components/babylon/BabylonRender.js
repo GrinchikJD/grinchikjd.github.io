@@ -2,7 +2,7 @@ class BabylonRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
-    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex gap-8 flex-col md:flex-row w-full' }]
+    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex md:gap-8 flex-col md:flex-row w-full' }]
 
     EZ_HTML = /*html*/`
     <div class="flex items-center">
@@ -31,15 +31,19 @@ class BabylonRender extends EzAlpineHTMLElement {
             <canvas id="main-canvas" :class="{ 'blur-sm' : isTexturesLoading }"
                 class="w-full md:w-auto"
                 style="outline:none;"></canvas>
+            <div class="w-1/3 md:hidden absolute top-0 left-0 h-full"></div>
+            <div class="w-1/3 md:hidden absolute top-0 right-0 h-full"></div>
         </div>
     </div>
-    <div class="flex-grow flex flex-col items-start justify-start px-6 md:p-2 text-white">
-        <h2 class="font-heading font-bold text-2xl text-gray-400 my-2">Customization</h2>
+    <div class="flex-grow flex flex-col items-start justify-start px-6 md:p-2 text-white max-md:pb-4">
+        <h2 class="font-heading font-bold text-2xl text-gray-400 my-2 max-md:hidden">Customization</h2>
         <div class="flex flex-col gap-4 my-4">
-        <template x-for="attribute in attributes" :key="attribute.code">
-            <div>
+        <template x-for="(attribute, idx) in attributes" :key="attribute.code">
+            <div :class="{ 'max-md:absolute top-4 left-6 max-md:flex items-center flex-col' : idx === 0}">
                 <span class="font-heading text-lg font-bold" x-text="attribute.title">Title</span>
-                <div class="flex items-center gap-2 mt-2">
+                <div class="flex items-center gap-2 mt-2"
+                    :class="{ 'max-md:flex-col' : idx === 0}"
+                >
                     <template x-for="option in attribute.options" :key="option.code">
                         <button @click="applyTextureByCode(attribute.code, option.code)"
                             :title="'Select ' + option.code + ' ' + attribute.code"
@@ -121,7 +125,7 @@ class BabylonRender extends EzAlpineHTMLElement {
                     { code: 'silver', preview: '/src/3d/smartphone/options/color_silver.webp' },
                     { code: 'green', preview: '/src/3d/smartphone/options/color_green.webp' },
                 ]},
-                {code: 'skin', title: "Cover texture", options: [
+                {code: 'skin', title: "Cover", options: [
                     { code: 'default', preview: '/src/3d/smartphone/options/skin_default.webp' },
                     { code: 'naruto', preview: '/src/3d/smartphone/options/skin_naruto.webp' }
                 ]}
@@ -206,8 +210,12 @@ class BabylonRender extends EzAlpineHTMLElement {
                 this.camera = camera;
                 camera.attachControl(this.canvas, true);
                 camera.wheelPrecision = 100;
-                camera.lowerRadiusLimit = 3;
-                camera.upperRadiusLimit = 6;
+                camera.lowerRadiusLimit = 4;
+                camera.upperRadiusLimit = 5;
+                camera.panningSensibility = 0;
+                if (camera.inputs && camera.inputs.attached.pointers) {
+                    camera.inputs.attached.pointers.multiTouchPanning = false;
+                }
 
                 scene.onPointerDown = () => { this.isGrabbing = true; };
                 window.addEventListener('mousemove', () => { this.isGrabbing = false; });
@@ -387,7 +395,6 @@ class BabylonRender extends EzAlpineHTMLElement {
                 });
                 if (!isWatched) this.rotateCameraTo(210);
             },
-
             rotateCameraTo(targetAlphaDegrees) {
                 const targetAlpha = targetAlphaDegrees * (Math.PI / 180);
                 let observer = null;
@@ -410,10 +417,6 @@ class BabylonRender extends EzAlpineHTMLElement {
                 });
             }
         }
-    }
-
-    connectedCallback() {
-         super.connectedCallback();
     }
 }
 $ez.setComponent(BabylonRender);
