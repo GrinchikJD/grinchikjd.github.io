@@ -324,30 +324,64 @@ class BabylonRender extends EzAlpineHTMLElement {
                 let inputActive = false;
                 let startX = 0;
                 let startY = 0;
-                let shiftXAccumulator = 0;
-                let shiftYAccumulator = 0;
+                let shiftXAccumulator = this.catchedTextureX || 0;
+                let shiftYAccumulator = this.catchedTextureY || 0;
                 const realWidth = this.imageInputCanvas.getBoundingClientRect().width;
                 const realHeight = this.imageInputCanvas.getBoundingClientRect().height;
-                const setStartingPoint = () => inputActive = true;
+                const getClientCoords = (e) => {
+                    if (e.touches && e.touches.length > 0) {
+                        return {
+                            x: e.touches[0].clientX,
+                            y: e.touches[0].clientY
+                        };
+                    } else if (e.changedTouches && e.changedTouches.length > 0) {
+                        return {
+                            x: e.changedTouches[0].clientX,
+                            y: e.changedTouches[0].clientY
+                        };
+                    }
+                    return {
+                        x: e.offsetX,
+                        y: e.offsetY
+                    };
+                };
+                const setStartingPoint = (e) => {
+                    inputActive = true;
+                    const coords = getClientCoords(e);
+                    const rect = this.imageInputCanvas.getBoundingClientRect();
+                    startX = coords.x - rect.left;
+                    startY = coords.y - rect.top;
+                };
                 const breakStartingPoint = () => {
+                    if (!inputActive) return;
                     inputActive = false;
                     startX = 0;
                     startY = 0;
                     shiftXAccumulator = this.catchedTextureX;
                     shiftYAccumulator = this.catchedTextureY;
-                }
+                };
+                const handleMove = (e) => {
+                    if (!inputActive) return;
+                    if (e.cancelable) {
+                        e.preventDefault();
+                    }
+                    const rect = this.imageInputCanvas.getBoundingClientRect();
+                    const coords = getClientCoords(e);
+                    const currentX = coords.x - rect.left;
+                    const currentY = coords.y - rect.top;
+                    let diffX = this.getPercentageByValues(currentX - startX, realWidth);
+                    let diffY = this.getPercentageByValues(currentY - startY, realHeight);
+                    this.catchedTextureX = diffX + shiftXAccumulator;
+                    this.catchedTextureY = diffY + shiftYAccumulator;
+                };
                 this.imageInputCanvas.addEventListener('mousedown', setStartingPoint.bind(this));
                 this.imageInputCanvas.addEventListener('mouseup', breakStartingPoint.bind(this));
                 this.imageInputCanvas.addEventListener('mouseleave', breakStartingPoint.bind(this));
-                this.imageInputCanvas.addEventListener('mousemove', (e) => {
-                    if (!inputActive) return;
-                    startX = startX ? startX : e.offsetX;
-                    startY = startY ? startY : e.offsetY;
-                    let diffX = this.getPercentageByValues(e.offsetX - startX, realWidth);
-                    let diffY = this.getPercentageByValues(e.offsetY - startY, realHeight);
-                    this.catchedTextureX = diffX + shiftXAccumulator;
-                    this.catchedTextureY = diffY + shiftYAccumulator;
-                });
+                this.imageInputCanvas.addEventListener('mousemove', handleMove.bind(this));
+                this.imageInputCanvas.addEventListener('touchstart', setStartingPoint.bind(this), { passive: false });
+                this.imageInputCanvas.addEventListener('touchend', breakStartingPoint.bind(this));
+                this.imageInputCanvas.addEventListener('touchcancel', breakStartingPoint.bind(this));
+                this.imageInputCanvas.addEventListener('touchmove', handleMove.bind(this), { passive: false });
             },
             getBlueprintCover(callback) {
                 if (this.imageBuffer) return this.imageBuffer;
