@@ -2,7 +2,7 @@ class BabylonRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
-    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex md:gap-8 flex-col md:flex-row w-full' }]
+    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex md:gap-8 flex-col md:flex-row w-full md:-my-[50px]' }]
 
     EZ_HTML = /*html*/`
     <div class="flex items-center">
@@ -35,19 +35,19 @@ class BabylonRender extends EzAlpineHTMLElement {
             <div class="w-1/3 md:hidden absolute top-0 right-0 h-full"></div>
         </div>
     </div>
-    <div class="flex-grow flex flex-col items-start justify-start px-6 md:p-2 text-white max-md:pb-4">
-        <h2 class="font-heading font-bold text-2xl text-gray-400 my-2 max-md:hidden">Customization</h2>
+    <div class="flex-grow flex flex-col items-start justify-center px-6 md:p-2 text-white max-md:pb-4">
+        <h2 class="font-heading font-bold text-xl text-gray-400 max-md:hidden">Customization</h2>
         <div class="flex flex-col gap-4 my-4">
         <template x-for="(attribute, idx) in attributes" :key="attribute.code">
             <div :class="{ 'max-md:absolute top-4 left-6 max-md:flex items-center flex-col' : idx === 0}">
-                <span class="font-heading text-lg font-bold" x-text="attribute.title">Title</span>
-                <div class="flex items-center gap-2 mt-2"
-                    :class="{ 'max-md:flex-col' : idx === 0}"
+                <span class="font-heading font-bold" x-text="attribute.title">Title</span>
+                <div class="flex items-center gap-2"
+                    :class="{ 'max-md:flex-col max-md:mt-2' : idx === 0}"
                 >
                     <template x-for="option in attribute.options" :key="option.code">
                         <button @click="applyTextureByCode(attribute.code, option.code)"
                             :title="'Select ' + option.code + ' ' + attribute.code"
-                            class="aspect-square w-16 max-w-16 flex items-center justify-center rounded-lg bg-gray-600
+                            class="aspect-square w-12 max-w-12 flex items-center justify-center rounded-lg bg-gray-600
                                 transition-all duration-200  hover:outline-white hover:outline overflow-hidden
                                 opacity-50 hover:opacity-100"
                             :class="{ 
@@ -58,7 +58,7 @@ class BabylonRender extends EzAlpineHTMLElement {
                             <img width="128" height="128"
                                 :alt="'Select ' + option.code + ' ' + attribute.code"
                                 :src="option.preview"
-                                class="aspect-square w-16 min-w-16 object-cover" 
+                                class="w-12 min-w-12 object-cover" 
                             />
                         </button>
                     </template>
@@ -68,14 +68,15 @@ class BabylonRender extends EzAlpineHTMLElement {
         </div>
         
         <label for="load-image" class="card rounded-full py-0.5">
-            <div class="card-content text-lg !rounded-full py-1 px-4">
-                Custom Cover
+            <div class="card-content font-semibold !rounded-full py-1 px-4 !bg-theme">
+                🪄 Custom Cover
             </div>
-            <input id="load-image" type="file" class="hidden" />
+            <input id="load-image" type="file" class="hidden" accept="image/png, image/jpeg, image/bmp, image/webp" />
         </label>
 
-        <div x-show="catchedTexture">
-            <div class="flex items-center justify-end relative cursor-move">
+        <div x-show="catchedTexture" 
+            class="absolute right-4 max-md:bottom-8 md:w-1/4 flex flex-col items-start justify-start z-10">
+            <div class="flex items-center justify-end relative cursor-move shadow-lg">
                 <div class="phone-blueprint-preview border-2 border-gray-600
                         overflow-hidden flex items-center justify-center"
                     style="width: 141px; height: 300px; border-radius: 15px; background-color:#000;"
@@ -83,14 +84,14 @@ class BabylonRender extends EzAlpineHTMLElement {
                     <canvas id="fetch-image" style="width: 141px; height: 300px;"></canvas>
                 </div>
                 <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" 
-                    class="absolute w-full -bottom-1 z-10"
+                    class="absolute w-full -bottom-1 z-10 hidden"
                 />
                 <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" 
-                    class="absolute !w-[300px] z-10 rotate-90 translate-x-[153px]"
+                    class="absolute !w-[300px] z-10 rotate-90 translate-x-[153px] hidden"
                 />
             </div>
             <template x-if="catchedTexture">
-                <div class="flex flex-col items-center mt-4">
+                <div class="flex flex-col gap-4 items-center mt-4">
                     <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
                     <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
                 </div>
@@ -303,6 +304,9 @@ class BabylonRender extends EzAlpineHTMLElement {
             getResultByPercentage(percentage, totalNumber) {
                 return Math.floor((percentage / 100) * totalNumber);
             },
+            getPercentageByValues(part, fullValue) {
+                return Math.floor((part * 100) / fullValue);
+            },
             handleImageInputImagePosition() {
                 this.loadInputImage(null, true);
             },
@@ -314,6 +318,36 @@ class BabylonRender extends EzAlpineHTMLElement {
                 this.imageInputCanvas.width = 512;
                 this.imageInputCanvas.height = 1087;
                 this.imageInput.addEventListener('change', this.loadInputImage.bind(this));
+                this.handleInputCanvasImageControlls();
+            },
+            handleInputCanvasImageControlls() {
+                let inputActive = false;
+                let startX = 0;
+                let startY = 0;
+                let shiftXAccumulator = 0;
+                let shiftYAccumulator = 0;
+                const realWidth = this.imageInputCanvas.getBoundingClientRect().width;
+                const realHeight = this.imageInputCanvas.getBoundingClientRect().height;
+                const setStartingPoint = () => inputActive = true;
+                const breakStartingPoint = () => {
+                    inputActive = false;
+                    startX = 0;
+                    startY = 0;
+                    shiftXAccumulator = this.catchedTextureX;
+                    shiftYAccumulator = this.catchedTextureY;
+                }
+                this.imageInputCanvas.addEventListener('mousedown', setStartingPoint.bind(this));
+                this.imageInputCanvas.addEventListener('mouseup', breakStartingPoint.bind(this));
+                this.imageInputCanvas.addEventListener('mouseleave', breakStartingPoint.bind(this));
+                this.imageInputCanvas.addEventListener('mousemove', (e) => {
+                    if (!inputActive) return;
+                    startX = startX ? startX : e.offsetX;
+                    startY = startY ? startY : e.offsetY;
+                    let diffX = this.getPercentageByValues(e.offsetX - startX, realWidth);
+                    let diffY = this.getPercentageByValues(e.offsetY - startY, realHeight);
+                    this.catchedTextureX = diffX + shiftXAccumulator;
+                    this.catchedTextureY = diffY + shiftYAccumulator;
+                });
             },
             getBlueprintCover(callback) {
                 if (this.imageBuffer) return this.imageBuffer;
@@ -347,8 +381,13 @@ class BabylonRender extends EzAlpineHTMLElement {
                         const shiftX = this.getResultByPercentage(this.catchedTextureX, imgWidth);
                         const shiftY = this.getResultByPercentage(this.catchedTextureY, imgHeight);
                         ctx.save();
+                        ctx.translate(shiftX, shiftY);
+                        const centerX = imgWidth / 2;
+                        const centerY = imgHeight / 2;
+                        ctx.translate(centerX, centerY);
                         ctx.rotate(this.catchedTextureRotate * Math.PI / 180);
-                        ctx.drawImage(img, shiftX, shiftY, imgWidth, imgHeight);
+                        ctx.translate(-centerX, -centerY);
+                        ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
                         ctx.restore();
                         if (isWatched) {
                             clearTimeout(this.applyingTimeout);

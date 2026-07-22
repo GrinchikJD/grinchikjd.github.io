@@ -49,9 +49,7 @@ class Header extends EzAlpineHTMLElement {
         <span class="capitalize" 
             x-text="menuArr[selectedIdx]?.title || breadCrumbs[breadCrumbs.length-1]?.title"></span>
     </button>
-    <div class="ml-auto z-50">
-        *
-    </div>
+    <div class="ml-auto z-50"></div>
     <template x-if="breadCrumbs.length">
         <div class="breadcrumbs px-3 md:px-4 text-xs text-gray-400 flex gap-2 z-10"
             :class="{ '-translate-x-full' : isMobileOpened }"
