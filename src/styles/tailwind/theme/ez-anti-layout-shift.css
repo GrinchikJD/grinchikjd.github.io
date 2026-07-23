@@ -29,7 +29,9 @@ ez-email {
     @apply min-h-[115px];
 }
 ez-dropdownlist,
-ez-three-render,
-ez-babylon-render {
+ez-three-render {
     @apply min-h-[394px];
+}
+ez-babylon-render {
+    @apply min-h-[561px] md:min-h-[400px];
 }

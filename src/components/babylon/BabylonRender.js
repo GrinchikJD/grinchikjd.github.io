@@ -2,7 +2,10 @@ class BabylonRender extends EzAlpineHTMLElement {
 
     ALPINE_COMPONENT_KEY = 'initBabylonRenderComponent';
 
-    ELEMENT_ATTRIBUTES = [{ 'class' : 'flex md:gap-8 flex-col md:flex-row w-full md:-my-[50px]' }]
+    ELEMENT_ATTRIBUTES = [
+        { 'class' : 'flex md:gap-8 flex-col md:flex-row w-full md:-my-[50px]' },
+        { '@resize.window' : 'checkIsMobile' }
+    ]
 
     EZ_HTML = /*html*/`
     <div class="flex items-center">
@@ -67,7 +70,7 @@ class BabylonRender extends EzAlpineHTMLElement {
         </template>
         </div>
         
-        <label for="load-image" class="card rounded-full py-0.5">
+        <label for="load-image" class="card card-magic rounded-full py-0.5">
             <div class="card-content font-semibold !rounded-full py-1 px-4 !bg-theme">
                 🪄 Custom Cover
             </div>
@@ -75,25 +78,34 @@ class BabylonRender extends EzAlpineHTMLElement {
         </label>
 
         <div x-show="catchedTexture" 
-            class="absolute right-4 max-md:bottom-8 md:w-1/4 flex flex-col items-start justify-start z-10">
+            class="absolute right-0 max-md:bottom-8 md:w-1/4 flex flex-col items-start justify-start z-10
+                transition-all duration-200 max-md:opacity-30 max-md:focus-within:opacity-100 group">
             <div class="flex items-center justify-end relative cursor-move shadow-lg">
                 <div class="phone-blueprint-preview border-2 border-gray-600
                         overflow-hidden flex items-center justify-center"
                     style="width: 141px; height: 300px; border-radius: 15px; background-color:#000;"
                 >
-                    <canvas id="fetch-image" style="width: 141px; height: 300px;"></canvas>
+                    <canvas id="fetch-image" tabindex="0" style="width: 141px; height: 300px;"></canvas>
+                    <code class="absolute text-xs p-2 m-2 bg-theme-alpha z-10 group-hover:hidden rounded-lg"
+                        x-text="isMobile ? 'Swipe over the image to change the position'
+                        : 'Left mouse click + moving the cursor over this area will change the position of the image'"
+                    ></code>
                 </div>
-                <input x-model:number="catchedTextureX" type="range"  min="-100" max="100" 
-                    class="absolute w-full -bottom-1 z-10 hidden"
-                />
-                <input x-model:number="catchedTextureY" type="range"  min="-100" max="100" 
-                    class="absolute !w-[300px] z-10 rotate-90 translate-x-[153px] hidden"
-                />
             </div>
             <template x-if="catchedTexture">
-                <div class="flex flex-col gap-4 items-center mt-4">
-                    <input x-model:number="catchedTextureScale" type="range"  min="20" max="500" />
-                    <input x-model:number="catchedTextureRotate" type="range"  min="-180" max="180" />
+                <div class="flex flex-col gap-2 items-center mt-2">
+                    <label for="scale-texture" class="flex items-center gap-2" title="Scale parameter">
+                        <img src="/src/svg/scale.svg" loading="lazy" width="16" height="16"
+                            alt="scale logo" />
+                        <input id="scale-texture" x-model:number="catchedTextureScale" type="range"  
+                            min="20" max="500" style="width: 75%;" />
+                    </label>
+                    <label for="rotate-texture" class="flex items-center gap-2" title="Rotation parameter">
+                        <img src="/src/svg/rotate.svg" loading="lazy" width="16" height="16"
+                            alt="Rotate logo" />
+                        <input id="rotate-texture" x-model:number="catchedTextureRotate" type="range"  
+                            min="-180" max="180" style="width: 75%;" />
+                    </label>
                 </div>
             </template>
         </div>
@@ -128,7 +140,9 @@ class BabylonRender extends EzAlpineHTMLElement {
                 ]},
                 {code: 'skin', title: "Cover", options: [
                     { code: 'default', preview: '/src/3d/smartphone/options/skin_default.webp' },
-                    { code: 'naruto', preview: '/src/3d/smartphone/options/skin_naruto.webp' }
+                    { code: 'naruto', preview: '/src/3d/smartphone/options/skin_naruto.webp' },
+                    { code: 'kitty', preview: '/src/3d/smartphone/options/skin_kitty.webp' },
+                    { code: 'donttouch', preview: '/src/3d/smartphone/options/skin_donttouch.webp' }
                 ]}
             ],
             isAllScriptsFetched: false,
@@ -143,6 +157,7 @@ class BabylonRender extends EzAlpineHTMLElement {
             catchedTextureRotate: 0,
             applyingDebounceMs: 500,
             applyingTimeout: null,
+            isMobile: false,
 
             init() {
                 this.canvas = this.$el.querySelector("#main-canvas");
@@ -154,6 +169,10 @@ class BabylonRender extends EzAlpineHTMLElement {
                 .forEach(variable => {
                     this.$watch(variable, this.handleImageInputImagePosition.bind(this));
                 });
+                this.checkIsMobile();
+            },
+            checkIsMobile() {
+                this.isMobile = window.innerWidth < 768;
             },
             getAttributePreviewSrc(attr, opt) {
                 return '/src/3d/smartphone/options/' + attr.code + '_' + opt.code + '.webp';
@@ -369,8 +388,8 @@ class BabylonRender extends EzAlpineHTMLElement {
                     const coords = getClientCoords(e);
                     const currentX = coords.x - rect.left;
                     const currentY = coords.y - rect.top;
-                    let diffX = this.getPercentageByValues(currentX - startX, realWidth);
-                    let diffY = this.getPercentageByValues(currentY - startY, realHeight);
+                    let diffX = this.getPercentageByValues(currentX - startX, realWidth * this.catchedTextureScale / 100);
+                    let diffY = this.getPercentageByValues(currentY - startY, realHeight * this.catchedTextureScale / 100);
                     this.catchedTextureX = diffX + shiftXAccumulator;
                     this.catchedTextureY = diffY + shiftYAccumulator;
                 };
@@ -392,8 +411,10 @@ class BabylonRender extends EzAlpineHTMLElement {
             loadInputImage(e, isWatched, customTimeoutMs) {
                 const file = e ? e.target.files[e.target.files.length - 1] : this.imageAttachment;
                 if (!file) return;
-                this.imageAttachment = file;
-                this.selectedSkin = 'default';
+                if (!isWatched) {
+                    this.imageAttachment = file;
+                    this.selectedSkin = null;
+                }
                 const ctx = this.imageInputCanvas.getContext("2d");
                 const reader = new FileReader();
                 const bgCover = this.getBlueprintCover();

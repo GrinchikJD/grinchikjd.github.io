@@ -44,10 +44,10 @@ input[type="range"]:focus {
    TRACK
    ========================================== */
 :root {
-    --range-track-height: 4px;
-    --range-track-margin: -4px;
+    --range-track-height: 10px;
+    --range-track-margin: -1px;
     --track-background-color: #99999911;
-    --track-background-color-active: #fff;
+    --track-background-color-active: #99999955;
 
     --range-thumb-radius: 12px;
     --range-thumb-color: #ffffff99;
@@ -126,5 +126,12 @@ button[disabled] {
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
+    }
+}
+
+/** All page scale for big-screens */
+@media (min-width: 1536px) {
+    html {
+        font-size: clamp(16px, 1vw + 2px, 24px); 
     }
 }

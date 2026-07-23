@@ -79,6 +79,14 @@ main {
         @apply opacity-100;
     }
 }
+.card-magic {
+    &:before {
+        background: linear-gradient(90deg,rgba(255, 255, 255, 0) 0%, rgba(255, 0, 0, 1) 35%, rgba(251, 255, 0, 1) 41%, rgba(30, 255, 0, 1) 48%, rgba(8, 0, 255, 1) 55%, rgba(255, 0, 221, 1) 63%, rgba(255, 255, 255, 0) 100%);
+    }
+    &:after {
+        background: linear-gradient(90deg,rgba(255, 0, 0, 0) 0%, rgba(255, 0, 0, 1) 13%, rgba(251, 255, 0, 1) 31%, rgba(30, 255, 0, 1) 46%, rgba(8, 0, 255, 1) 62%, rgba(255, 0, 0, 1) 81%, rgba(255, 0, 0, 0) 100%);
+    } 
+}
 
 /** Background rotation effects
 @keyframes spin {
