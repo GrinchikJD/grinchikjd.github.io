@@ -48,7 +48,7 @@ class Showcase extends EzAlpineHTMLElement {
                         Check out the demo.`
                 },
                 { 
-                    url: "",
+                    url: "https://github.com/ezlandjs/ezlandjs.github.io",
                     title: "EzLand.js", img: "/src/img/particles_circle.webp",
                     description: "Need a small landing page? Like this one?",
                     details: `EzLand.js is my small library for quickly creating client-side rendering landing pages using Web Components. 
@@ -56,7 +56,7 @@ class Showcase extends EzAlpineHTMLElement {
                         Check out the demo.`
                 },
                 { 
-                    url: "",
+                    url: "https://penekjd.github.io/",
                     title: "Languager", img: "/src/img/showcase/languager.webp",
                     description: "The web-app designed for language learning.",
                     details: `Circumstances required me to learn several languages. 
